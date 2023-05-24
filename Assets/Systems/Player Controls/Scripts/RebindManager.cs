@@ -68,18 +68,27 @@ public class RebindManager : MonoBehaviour
         }
     }
 
-    public void RebindControl(int index){
-        var action = controls.actionMaps[0].actions[index];
+    public void RebindControl(int actionIndex){
+        var action = controls.actionMaps[0].actions[actionIndex];
+
+        // if(action.bindings[0].isComposite)
+        //     compositeBinding = true;
         
         TextMeshProUGUI text = rebindContainer.Find(action.name).GetChild(0).GetComponent<TextMeshProUGUI>();
 
         if(text == null){
             return;
         }
-
-        rebindOperation = action.PerformInteractiveRebinding()
-            .OnComplete(_ => UpdateText(text, action))
-            .Start();
+        
+        // if(!compositeBinding){
+            rebindOperation = action.PerformInteractiveRebinding()
+                .OnComplete(_ => UpdateText(text, action))
+                .Start();
+        // }
+        // else{
+            rebindOperation = action.PerformInteractiveRebinding()
+                .Start();
+        // }
     }
 
     public void UpdateText(TextMeshProUGUI text, InputAction action){

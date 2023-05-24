@@ -780,7 +780,20 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
   webGLPowerPreference: 2
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    EmbeddedLinux: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    GameCoreXboxOne: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    Lumin: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    Nintendo Switch: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    PS4: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    PS5: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    Stadia: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    Standalone: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    WebGL: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    Windows Store Apps: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    XboxOne: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
+    tvOS: ENVIRO_LW;ENVIRO_HD;ENVIRO_LWRP
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend: {}
