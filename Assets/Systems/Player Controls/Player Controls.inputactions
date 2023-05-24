@@ -15,6 +15,24 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "sprint",
+                    "type": "Button",
+                    "id": "650dca7b-7132-44e0-bf8a-0c8a49edc4c3",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "walkToggle",
+                    "type": "Button",
+                    "id": "9467fbd8-ee87-4d66-84db-10002e5f2357",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "look",
                     "type": "Value",
                     "id": "405499a1-993d-423c-8adb-beee4eaf3248",
@@ -22,6 +40,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "menu",
+                    "type": "Button",
+                    "id": "49abb355-87ca-4204-8a7e-24bdc479d1e5",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -82,12 +109,73 @@
                 },
                 {
                     "name": "",
+                    "id": "674a6319-a724-45c3-9ef3-ba10c689d4e0",
+                    "path": "<Keyboard>/quote",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "sprint",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5eb287bc-1dc7-4fba-9962-ed8ae760882c",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "walkToggle",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "97913ec3-ce9d-4e53-affb-9303345b3701",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "menu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "a46601c4-0971-43e7-a240-c15860cfd098",
                     "path": "<Pointer>/delta",
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse_Keyboard",
                     "action": "look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "menu",
+            "id": "c9ac28c3-28c5-4b1d-973a-206ac47afcc6",
+            "actions": [
+                {
+                    "name": "close",
+                    "type": "Button",
+                    "id": "c682db91-db61-4220-9d85-fd9d69f32a51",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c0068bb8-5108-46e5-ac46-e8d573fc1e2b",
+                    "path": "<Keyboard>/escape",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "close",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
