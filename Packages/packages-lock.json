@@ -1,5 +1,19 @@
 {
   "dependencies": {
+    "com.jbooth.microsplat.core": {
+      "version": "file:com.jbooth.microsplat.core",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.jbooth.microsplat.urp2021": {
+      "version": "file:com.jbooth.microsplat.urp2021",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.jbooth.microsplat.core": "3.9.0"
+      }
+    },
     "com.unity.burst": {
       "version": "1.8.4",
       "depth": 1,
