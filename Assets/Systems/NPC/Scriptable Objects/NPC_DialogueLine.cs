@@ -5,6 +5,16 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "NPC/Dialogue Line")]
 public class NPC_DialogueLine : ScriptableObject
 {
+    [System.Serializable]
+    public class ContentItem{
+        public string type;
+        public string subtype;
+        //Specifics defaults to not applicable
+        public string specifics = "n-a";
+
+    }
+    
     public string dialogue;
-    public string[] content;
+    [Header("If specifics or subtype are not applicable, write n-a")]
+    public ContentItem[] content;
 }

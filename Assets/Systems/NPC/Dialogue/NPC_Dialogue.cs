@@ -122,31 +122,22 @@ public class NPC_Dialogue : MonoBehaviour
             if(!factionTrump)
             {
                 if(otherFactions.Contains(item.towards) && Mathf.Abs(item.status) > 1 && Mathf.Abs(item.status) > Mathf.Abs(myActiveBias.status)){
-                    
                     foreach (NPC_Data.NPCFaction factionStruct in other.data.factions)
                     {
                         if(factionStruct.faction == item.towards){
-
                             if(!factionStruct.visible){
-
                                 if(item.towards.membersRecognize){
                                     myActiveBias = item;
                                     factionTrump = true;
                                     break;
                                 }
-
                             }
                             else{
                                 myActiveBias = item;
                             }
-
                         }
-                        
-                        
                     }
-                    
                 }
-
             }
         }
         
@@ -160,11 +151,9 @@ public class NPC_Dialogue : MonoBehaviour
             if(!otherFactionTrump)
             {
                 if(myFactions.Contains(item.towards) && Mathf.Abs(item.status) > 1 && Mathf.Abs(item.status) > Mathf.Abs(otherActiveBias.status)){
-                    
                     foreach (NPC_Data.NPCFaction factionStruct in data.factions)
                     {
                         if(factionStruct.faction == item.towards){
-
                             if(!factionStruct.visible){
 
                                 if(item.towards.membersRecognize){
@@ -172,27 +161,23 @@ public class NPC_Dialogue : MonoBehaviour
                                     otherFactionTrump = true;
                                     break;
                                 }
-
                             }
                             else{
                                 otherActiveBias = item;
                             }
 
                         }
-                        
-                        
                     }
-                    
                 }
-
             }
         }
         
         if(Mathf.Abs(myActiveBias.status) >= Mathf.Abs(otherActiveBias.status) && myActiveBias.status != 0){
-            InitiateDialogue(data);
+            // InitiateDialogue(data);
+            SelectDialogueSet(myActiveBias.status, myActiveBias.towards);
         }
         else if(Mathf.Abs(myActiveBias.status) <= Mathf.Abs(otherActiveBias.status) && Mathf.Abs(otherActiveBias.status) != 0){
-            other.InitiateDialogue(other.data);
+            other.SelectDialogueSet(otherActiveBias.status, otherActiveBias.towards);
         }
         else{
             Debug.Log("NPCs had no relations or biases towards each other; no dialogue was initiated.");
@@ -209,17 +194,124 @@ public class NPC_Dialogue : MonoBehaviour
         
         if(mostExtremeStatus.towards != data){
             // I initiate
-            InitiateDialogue(data);
-            
+            // InitiateDialogue(data);
+            SelectDialogueSet(mostExtremeStatus.status, other);
         }
         else{
             // Other initiates
-            other.GetComponent<NPC_Dialogue>().InitiateDialogue(other);
+            // other.GetComponent<NPC_Dialogue>().InitiateDialogue(other);
+            other.GetComponent<NPC_Dialogue>().SelectDialogueSet(mostExtremeStatus.status, data);
         }
     }
 
-    public void InitiateDialogue(NPC_Data data){
-        Debug.Log(data.characterName + " initiated dialogue.");
+//INDIVIDUAL overload
+    public void SelectDialogueSet(int status, NPC_Data individual){
+        //This function is the first in the chain of events that is called on the 
+        //character INITIATING dialogue as opposed to the character with the higher
+        //INSTANCE ID (which could coincidentally be the same character)
+
+        DialogueSet selectedSet = null;
+
+        //Check if there is a unique dialogue group for this individual
+        foreach (var uniqueDialogueGroup in data.uniqueDialogueGroups)
+        {
+            if(uniqueDialogueGroup.I_towards == individual){
+                if(status == -3)
+                    selectedSet = uniqueDialogueGroup.dneg3;
+                if(status == -2)
+                    selectedSet = uniqueDialogueGroup.dneg2;
+                if(status == -1)
+                    selectedSet = uniqueDialogueGroup.dneg1;
+                if(status == 0)
+                    selectedSet = uniqueDialogueGroup.d0;
+                if(status == 1)
+                    selectedSet = uniqueDialogueGroup.dpos1;
+                if(status == 2)
+                    selectedSet = uniqueDialogueGroup.dpos2;
+                if(status == 3)
+                    selectedSet = uniqueDialogueGroup.dpos3;
+                
+                InitiateDialogue(selectedSet);
+                return;
+            }
+        }
+
+        //If there is, select a dialogue set of the appropriate disposition from the unique set
+        //Otherwise, use the generic set
+        if(status == -3)
+            selectedSet = data.genericDialogueGroup.dneg3;
+        if(status == -2)
+            selectedSet = data.genericDialogueGroup.dneg2;
+        if(status == -1)
+            selectedSet = data.genericDialogueGroup.dneg1;
+        if(status == 0)
+            selectedSet = data.genericDialogueGroup.d0;
+        if(status == 1)
+            selectedSet = data.genericDialogueGroup.dpos1;
+        if(status == 2)
+            selectedSet = data.genericDialogueGroup.dpos2;
+        if(status == 3)
+            selectedSet = data.genericDialogueGroup.dpos3;
+        //  ^  Initiate dialogue with selected dialogue set
+        
+        InitiateDialogue(selectedSet);
+    }
+//FACTION overload
+    public void SelectDialogueSet(int status, NPC_Faction faction){
+        //This function is the first in the chain of events that is called on the 
+        //character INITIATING dialogue as opposed to the character with the higher
+        //INSTANCE ID (which could coincidentally be the same character)
+
+        DialogueSet selectedSet = null;
+
+        //Check if there is a unique dialogue group for this faction
+        foreach (var uniqueDialogueGroup in data.uniqueDialogueGroups)
+        {
+            if(uniqueDialogueGroup.F_towards == faction){
+                if(status == -3)
+                    selectedSet = uniqueDialogueGroup.dneg3;
+                if(status == -2)
+                    selectedSet = uniqueDialogueGroup.dneg2;
+                if(status == -1)
+                    selectedSet = uniqueDialogueGroup.dneg1;
+                if(status == 0)
+                    selectedSet = uniqueDialogueGroup.d0;
+                if(status == 1)
+                    selectedSet = uniqueDialogueGroup.dpos1;
+                if(status == 2)
+                    selectedSet = uniqueDialogueGroup.dpos2;
+                if(status == 3)
+                    selectedSet = uniqueDialogueGroup.dpos3;
+                
+                InitiateDialogue(selectedSet);
+                return;
+            }
+        }
+
+        //If there is, select a dialogue set of the appropriate disposition from the unique set
+        //Otherwise, use the generic set
+        if(status == -3)
+            selectedSet = data.genericDialogueGroup.dneg3;
+        if(status == -2)
+            selectedSet = data.genericDialogueGroup.dneg2;
+        if(status == -1)
+            selectedSet = data.genericDialogueGroup.dneg1;
+        if(status == 0)
+            selectedSet = data.genericDialogueGroup.d0;
+        if(status == 1)
+            selectedSet = data.genericDialogueGroup.dpos1;
+        if(status == 2)
+            selectedSet = data.genericDialogueGroup.dpos2;
+        if(status == 3)
+            selectedSet = data.genericDialogueGroup.dpos3;
+        //  ^  Initiate dialogue with selected dialogue set
+        
+        InitiateDialogue(selectedSet);
+    }
+
+    void InitiateDialogue(DialogueSet dialogueSet){
+        Debug.Log(data.characterName + " initiated dialogue with dialogue set: " + dialogueSet.name);
+        //
     }
 
 }

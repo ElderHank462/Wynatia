@@ -54,6 +54,7 @@ public class NPC_Data : MonoBehaviour
     public FactionAssociation[] knownFactionAssociations;
 
     public GenericDialogueGroup genericDialogueGroup;
+    public List<UniqueDialogueGroup> uniqueDialogueGroups;
 
 
 }
