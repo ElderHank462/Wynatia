@@ -14,4 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dialogue: Hello.
   content:
-  - greeting
+  - type: greeting
+    subtype: n-a
+    specifics: n-a
+  timeFactor: 1

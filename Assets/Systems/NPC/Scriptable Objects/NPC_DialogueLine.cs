@@ -17,4 +17,6 @@ public class NPC_DialogueLine : ScriptableObject
     public string dialogue;
     [Header("If specifics or subtype are not applicable, write n-a")]
     public ContentItem[] content;
+
+    public float timeFactor = 1;
 }

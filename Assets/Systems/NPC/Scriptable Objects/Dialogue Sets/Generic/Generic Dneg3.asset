@@ -13,5 +13,6 @@ MonoBehaviour:
   m_Name: Generic Dneg3
   m_EditorClassIdentifier: 
   openingLines:
-  - {fileID: 11400000, guid: 3653224e3b0a84d9bb0c90b2d3e4ab68, type: 2}
+  - {fileID: 11400000, guid: 1c760dab56e104c3289649552c37e2c5, type: 2}
+  - {fileID: 11400000, guid: 1c760dab56e104c3289649552c37e2c5, type: 2}
   otherLines: []

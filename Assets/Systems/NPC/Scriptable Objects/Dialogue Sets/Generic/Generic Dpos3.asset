@@ -12,5 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 103a613357a5f4d608003ce1c7f3092e, type: 3}
   m_Name: Generic Dpos3
   m_EditorClassIdentifier: 
-  openingLines: []
+  openingLines:
+  - {fileID: 11400000, guid: 2732bdf9e6e844db68e9e0bd32b8182f, type: 2}
+  - {fileID: 11400000, guid: f2b22bda3c94243999ae00881fad4b18, type: 2}
   otherLines: []

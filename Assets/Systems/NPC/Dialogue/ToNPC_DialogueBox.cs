@@ -5,39 +5,29 @@ using TMPro;
 
 public class ToNPC_DialogueBox : MonoBehaviour
 {
-    public TextMeshProUGUI textAsset;
+    public TextMeshProUGUI text;
 
-    Vector3 bottomLeft;
-    Vector3 bottomRight;
-    Vector3 topLeft;
-    Vector3 topRight;
-
-    TMP_CharacterInfo firstChar;
-    TMP_CharacterInfo lastChar;
-    
-    // Start is called before the first frame update
-    void Start()
-    {
-        // textAsset = GetComponent<TextMeshProUGUI>();
+    public void Hide(){
+        foreach (Transform child in transform)
+        {
+            child.gameObject.SetActive(false);
+        }
     }
 
-    public void FillText(){
+    public int ShowForDuration(string textToSet){
+        transform.localPosition = new Vector3(0, 1.75f, 0);
 
+        SetText(textToSet);
+
+        foreach (Transform child in transform)
+        {
+            child.gameObject.SetActive(true);
+        }
+
+        return textToSet.Length;
     }
 
-    // // Update is called once per frame
-    // void Update()
-    // {
-
-
-    //     firstChar = textAsset.textInfo.characterInfo[textAsset.textInfo.wordInfo[0].firstCharacterIndex];
-    //     lastChar = textAsset.textInfo.characterInfo[textAsset.textInfo.wordInfo[0].lastCharacterIndex];
-        
-    //     float topEdge = (firstChar.fontAsset.faceInfo.capLine * firstChar.scale) + firstChar.baseLine;
-
-    //     bottomLeft = transform.TransformPoint(new Vector3(firstChar.origin, firstChar.baseLine, 0));
-    //     bottomRight = transform.TransformPoint(new Vector3(lastChar.xAdvance, lastChar.baseLine, 0));
-    //     topLeft = transform.TransformPoint(new Vector3(firstChar.origin, topEdge, 0));
-    //     topRight = transform.TransformPoint(new Vector3(lastChar.xAdvance, topEdge, 0));
-    // }
+    public void SetText(string dialogue){
+        text.SetText(dialogue);
+    }
 }

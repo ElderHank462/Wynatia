@@ -14,4 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dialogue: Nice to see you.
   content:
-  - greeting
+  - type: greeting
+    subtype: n-a
+    specifics: n-a
+  timeFactor: 1

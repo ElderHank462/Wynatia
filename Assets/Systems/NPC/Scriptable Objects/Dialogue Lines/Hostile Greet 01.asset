@@ -12,5 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 534d1a8caca9f4d12b91f00a97a845da, type: 3}
   m_Name: Hostile Greet 01
   m_EditorClassIdentifier: 
-  dialogue: 
-  content: []
+  dialogue: Get out of my sight before things get ugly.
+  content:
+  - type: greeting
+    subtype: n-a
+    specifics: n-a
+  timeFactor: 1

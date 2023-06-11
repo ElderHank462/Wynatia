@@ -14,4 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dialogue: Oh, you again.
   content:
-  - greeting
+  - type: greeting
+    subtype: n-a
+    specifics: n-a
+  timeFactor: 1
