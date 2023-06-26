@@ -82,7 +82,8 @@ public class DialogueMap : MonoBehaviour
             B_SelectRandomOpener();
         }
         else{
-            Debug.Log("Dialogue line contains content content other than a greeting.");
+            Debug.Log("NPC A dialogue line contains content content other than a greeting.");
+            Respond(DialogueHandler.AnalyzeContent(npcA_OpeningLines[i], npcA_Lines, npcB_Lines));
         }
     }
 
@@ -95,8 +96,39 @@ public class DialogueMap : MonoBehaviour
             Debug.Log("Dialogue path complete: NPCs will greet each other then end dialogue.");
             StartDialogue();
         }
+        else{
+            Debug.Log("NPC B dialogue line contains content content other than a greeting.");
+            Respond(DialogueHandler.AnalyzeContent(npcB_OpeningLines[i], npcB_Lines, npcA_Lines));
+        }
   
     }
+
+    void Respond(Line response){
+        
+        // Find the matching NPC_DialogueLine (scriptable object) for the response Line (struct)
+
+        // In case I need the below code again, here's the argument 'lines': NPC_DialogueLine[] lines
+        // for(int currentLine = 0; currentLine < lines.Length; currentLine++)
+        // {
+        //     for(int currentContentItem = 0; currentContentItem < lines[currentContentItem].content.Length; currentContentItem++)
+        //     {
+        //         if(lines[currentLine].content[currentContentItem].type == response.content[currentContentItem].type){
+        //             if(lines[currentLine].content[currentContentItem].subtype == response.content[currentContentItem].subtype){
+        //                 if(lines[currentLine].content[currentContentItem].specifics == response.content[currentContentItem].specifics){
+        //                     dialoguePath.Add(lines[currentLine]);
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+
+        //Guess I don't need to? ;)
+        
+        dialoguePath.Add(response);
+        StartDialogue();
+        // ^ This is temporary
+    }
+
 
     bool CheckIfGreetingOnly(NPC_DialogueLine.ContentItem[] content){
         bool greetingOnly = false;

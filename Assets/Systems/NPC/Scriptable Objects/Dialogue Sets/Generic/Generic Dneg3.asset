@@ -15,4 +15,5 @@ MonoBehaviour:
   openingLines:
   - {fileID: 11400000, guid: 1c760dab56e104c3289649552c37e2c5, type: 2}
   - {fileID: 11400000, guid: 1c760dab56e104c3289649552c37e2c5, type: 2}
-  otherLines: []
+  otherLines:
+  - {fileID: 11400000, guid: f989a6b3d02e843578757038f7a30535, type: 2}

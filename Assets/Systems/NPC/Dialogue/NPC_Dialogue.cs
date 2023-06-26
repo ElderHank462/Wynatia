@@ -48,6 +48,7 @@ public class NPC_Dialogue : MonoBehaviour
                 // Debug.Log("NPC " + other.gameObject.name + " has a relationship with " + gameObject.name + " of status " + i);
                 mostExtremeStatus = relationship;
                 otherMostExtremeRelationship = relationship;
+                Debug.Log("otherMostExtremeRelationship: status: " + otherMostExtremeRelationship.status + "; towards: " + otherMostExtremeRelationship.towards);
                 CheckMyRelations(other.data);
                 return;
             }
@@ -228,7 +229,7 @@ public class NPC_Dialogue : MonoBehaviour
         //Check if there is a unique dialogue group for this individual
         foreach (var uniqueDialogueGroup in data.uniqueDialogueGroups)
         {
-            if(uniqueDialogueGroup.I_towards == individual){
+            if(uniqueDialogueGroup.I_towards == individual.id){
                 if(status == -3)
                     selectedSet = uniqueDialogueGroup.dneg3;
                 if(status == -2)
@@ -244,7 +245,7 @@ public class NPC_Dialogue : MonoBehaviour
                 if(status == 3)
                     selectedSet = uniqueDialogueGroup.dpos3;
                 
-                InitiateDialogue(individual, selectedSet, OtherNPCsSet(otherMostExtremeRelationship, data));
+                InitiateDialogue(individual, selectedSet, OtherNPCsSet(otherMostExtremeRelationship, individual));
                 return;
             }
         }
@@ -267,7 +268,7 @@ public class NPC_Dialogue : MonoBehaviour
             selectedSet = data.genericDialogueGroup.dpos3;
         //  ^  Initiate dialogue with selected dialogue set
         
-        InitiateDialogue(individual, selectedSet, OtherNPCsSet(otherMostExtremeRelationship, data));
+        InitiateDialogue(individual, selectedSet, OtherNPCsSet(otherMostExtremeRelationship, individual));
     }
 //FACTION overload
     public void SelectDialogueSet(int status, NPC_Data other, NPC_Faction faction){
@@ -318,17 +319,17 @@ public class NPC_Dialogue : MonoBehaviour
         InitiateDialogue(other, selectedSet, OtherNPCsSet(otherMostExtremeBias, otherMostExtremeBias.towards));
     }
 //INDIVIDUAL overload
-    public DialogueSet OtherNPCsSet(NPC_Data.NPCRelationship relationship, NPC_Data individual){
+    public DialogueSet OtherNPCsSet(NPC_Data.NPCRelationship relationship, NPC_Data other){
         
 
         int status = relationship.status;
         DialogueSet selectedSet = null;
 
         //Check if there is a unique dialogue group for this individual
-        foreach (var uniqueDialogueGroup in data.uniqueDialogueGroups)
+        foreach (var uniqueDialogueGroup in other.uniqueDialogueGroups)
         {
             //If there is, select a dialogue set of the appropriate disposition from the unique set
-            if(uniqueDialogueGroup.I_towards == individual){
+            if(uniqueDialogueGroup.I_towards == data.id){
                 if(status == -3)
                     selectedSet = uniqueDialogueGroup.dneg3;
                 if(status == -2)
@@ -350,19 +351,19 @@ public class NPC_Dialogue : MonoBehaviour
 
         //Otherwise, use the generic set
         if(status == -3)
-            selectedSet = data.genericDialogueGroup.dneg3;
+            selectedSet = other.genericDialogueGroup.dneg3;
         if(status == -2)
-            selectedSet = data.genericDialogueGroup.dneg2;
+            selectedSet = other.genericDialogueGroup.dneg2;
         if(status == -1)
-            selectedSet = data.genericDialogueGroup.dneg1;
+            selectedSet = other.genericDialogueGroup.dneg1;
         if(status == 0)
-            selectedSet = data.genericDialogueGroup.d0;
+            selectedSet = other.genericDialogueGroup.d0;
         if(status == 1)
-            selectedSet = data.genericDialogueGroup.dpos1;
+            selectedSet = other.genericDialogueGroup.dpos1;
         if(status == 2)
-            selectedSet = data.genericDialogueGroup.dpos2;
+            selectedSet = other.genericDialogueGroup.dpos2;
         if(status == 3)
-            selectedSet = data.genericDialogueGroup.dpos3;
+            selectedSet = other.genericDialogueGroup.dpos3;
         //  ^  Initiate dialogue with selected dialogue set
         
         return selectedSet;
@@ -427,6 +428,11 @@ public class NPC_Dialogue : MonoBehaviour
         
         Debug.Log(data.characterName + " initiated dialogue with: " + otherData.characterName + ". " + data.characterName + 
         " is using dialogue set: " + dialogueSet.name + "; " + otherData.characterName + " is using dialogue set: " + otherDialogueSet);
+        // Debug.Log(otherData.characterName);
+        // Debug.Log(data.characterName);
+        // Debug.Log(dialogueSet.name);
+        // Debug.Log(otherData.characterName);
+        // Debug.Log(otherDialogueSet);
 
         GameObject instObject = Instantiate((GameObject)Resources.Load("Prefabs/Empty"));
         instObject.name = "DialogueMap";

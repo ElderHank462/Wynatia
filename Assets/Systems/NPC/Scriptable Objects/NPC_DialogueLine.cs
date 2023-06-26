@@ -12,11 +12,17 @@ public class NPC_DialogueLine : ScriptableObject
         //Specifics defaults to not applicable
         public string specifics = "n-a";
 
+        public ContentItem(string contentType, string contentSubtype, string contentSpecifics){
+            type = contentType;
+            subtype = contentSubtype;
+            specifics = contentSpecifics;
+        }
+
     }
     
     public string dialogue;
     [Header("If specifics or subtype are not applicable, write n-a")]
     public ContentItem[] content;
 
-    public float timeFactor = 1;
+    // public float timeFactor = 1;
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "NPC/Unique Dialogue Group")]
 public class UniqueDialogueGroup : ScriptableObject
 {
-    public NPC_Data I_towards;
+    public NPC_ID I_towards;
     public NPC_Faction F_towards;
     
     public DialogueSet dneg3;

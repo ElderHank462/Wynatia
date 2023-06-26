@@ -49,6 +49,42 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "jump",
+                    "type": "Button",
+                    "id": "9037eb13-74a3-494e-aaf0-28e35caf79ef",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "sheathe",
+                    "type": "Button",
+                    "id": "68ec845e-93a4-4313-8ff7-6a86dd62e4e1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "meleeAttack",
+                    "type": "Button",
+                    "id": "5a7c56ef-9026-405b-8409-14fb8fbb89e4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Tap(duration=0.19)",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "meleePowerAttack",
+                    "type": "Button",
+                    "id": "575acf46-5c01-45c0-a040-22d3b9d6b085",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold(duration=0.2)",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -148,6 +184,50 @@
                     "processors": "",
                     "groups": "Mouse_Keyboard",
                     "action": "look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bddee563-d55b-4b56-af5e-900c6bf93672",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ace8db4c-9983-479f-b7b6-95279dfba1a9",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "sheathe",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "450e349b-c772-4b65-9d16-3015cd7b7887",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "meleeAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6566e8eb-bcc0-4550-ab83-cd68b8ab9447",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "meleePowerAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

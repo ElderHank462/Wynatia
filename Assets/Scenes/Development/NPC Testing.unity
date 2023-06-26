@@ -25,7 +25,7 @@ RenderSettings:
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 0
-  m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
+  m_SubtractiveShadowColor: {r: 0.41960785, g: 0.47843137, b: 0.627451, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
@@ -370,6 +370,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Orange
+  id: {fileID: 0}
   talkable: 1
   biases:
   - towards: {fileID: 11400000, guid: 1bb07efb59a8c45ac8af3cdb47672c51, type: 2}
@@ -377,6 +378,7 @@ MonoBehaviour:
   relationships: []
   factions: []
   knownFactionAssociations: []
+  interests: []
   genericDialogueGroup: {fileID: 11400000, guid: 320666b128d864585881cbf0d546ee1c,
     type: 2}
   uniqueDialogueGroups: []
@@ -1271,6 +1273,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Gotsr
+  id: {fileID: 0}
   talkable: 1
   biases:
   - towards: {fileID: 11400000, guid: 1bb07efb59a8c45ac8af3cdb47672c51, type: 2}
@@ -1278,6 +1281,7 @@ MonoBehaviour:
   relationships: []
   factions: []
   knownFactionAssociations: []
+  interests: []
   genericDialogueGroup: {fileID: 11400000, guid: 320666b128d864585881cbf0d546ee1c,
     type: 2}
   uniqueDialogueGroups: []
@@ -1409,6 +1413,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Blue
+  id: {fileID: 0}
   talkable: 1
   biases: []
   relationships:
@@ -1416,6 +1421,7 @@ MonoBehaviour:
     status: 0
   factions: []
   knownFactionAssociations: []
+  interests: []
   genericDialogueGroup: {fileID: 11400000, guid: 320666b128d864585881cbf0d546ee1c,
     type: 2}
   uniqueDialogueGroups: []
@@ -1579,16 +1585,21 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Red
+  id: {fileID: 11400000, guid: d51e8673da2f24d828fac5d24922ec9e, type: 2}
   talkable: 1
   biases: []
   relationships:
   - towards: {fileID: 1493344658}
-    status: 2
+    status: 1
   factions: []
-  knownFactionAssociations: []
+  knownFactionAssociations:
+  - character: {fileID: 0}
+    association: {fileID: 0}
+  interests: []
   genericDialogueGroup: {fileID: 11400000, guid: 320666b128d864585881cbf0d546ee1c,
     type: 2}
-  uniqueDialogueGroups: []
+  uniqueDialogueGroups:
+  - {fileID: 11400000, guid: a1af9af01e32747f0a81fb0a42c2e733, type: 2}
 --- !u!1 &1085778162
 GameObject:
   m_ObjectHideFlags: 0
@@ -2294,14 +2305,14 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1493344651}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.8098454, y: -7.0974474, z: 9.529306}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: 0.00000058114523}
+  m_LocalPosition: {x: 3.809845, y: -7.0974474, z: 9.529306}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1886515421}
   m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
 --- !u!54 &1493344653
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2410,13 +2421,27 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Yellow
+  id: {fileID: 11400000, guid: 84bdb2ed7da644039a594bccf3e26639, type: 2}
   talkable: 1
   biases: []
   relationships:
   - towards: {fileID: 1061112032}
-    status: 1
+    status: 2
   factions: []
   knownFactionAssociations: []
+  interests:
+  - interestLevel: 0
+    type: offer
+    subtype: gold
+    specifics: 30
+    acceptLine: {fileID: 11400000, guid: 92297951d8c1847d4b0776dbe1808abd, type: 2}
+    refuseLine: {fileID: 11400000, guid: 19a9c7e1a3e2a484fa1d82698bd23d2c, type: 2}
+  - interestLevel: 0
+    type: offer
+    subtype: gold
+    specifics: 20
+    acceptLine: {fileID: 11400000, guid: 644412548c7294588b6ebaa78b1402e2, type: 2}
+    refuseLine: {fileID: 11400000, guid: 19a9c7e1a3e2a484fa1d82698bd23d2c, type: 2}
   genericDialogueGroup: {fileID: 11400000, guid: 320666b128d864585881cbf0d546ee1c,
     type: 2}
   uniqueDialogueGroups: []
@@ -2528,7 +2553,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1886515421}
   m_Layer: 0
-  m_Name: Testing Zone (2)
+  m_Name: Dialogue Testing
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2589,11 +2614,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Green
+  id: {fileID: 0}
   talkable: 1
   biases: []
   relationships: []
   factions: []
   knownFactionAssociations: []
+  interests: []
   genericDialogueGroup: {fileID: 11400000, guid: 320666b128d864585881cbf0d546ee1c,
     type: 2}
   uniqueDialogueGroups: []
@@ -2848,6 +2875,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Random Guy
+  id: {fileID: 0}
   talkable: 1
   biases: []
   relationships: []
@@ -2855,6 +2883,7 @@ MonoBehaviour:
   - faction: {fileID: 11400000, guid: 1bb07efb59a8c45ac8af3cdb47672c51, type: 2}
     visible: 1
   knownFactionAssociations: []
+  interests: []
   genericDialogueGroup: {fileID: 11400000, guid: 320666b128d864585881cbf0d546ee1c,
     type: 2}
   uniqueDialogueGroups: []
@@ -3300,11 +3329,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   characterName: Purple
+  id: {fileID: 0}
   talkable: 1
   biases: []
   relationships: []
   factions: []
   knownFactionAssociations: []
+  interests: []
   genericDialogueGroup: {fileID: 11400000, guid: 320666b128d864585881cbf0d546ee1c,
     type: 2}
   uniqueDialogueGroups: []

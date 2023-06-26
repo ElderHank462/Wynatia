@@ -7,30 +7,41 @@ public class PlayerMovement : MonoBehaviour
 {
     Transform tr;
     Transform cam;
+    CharacterController charController;
     PlayerInput playerInput;
     public GameObject pauseMenu;
 
     Vector3 moveInput;
     Vector3 rot;
-    Vector3 rotEulers = Vector3.zero;
+    Vector3 camEulers;
+    Vector3 velocity = Vector3.zero;
+
 
     //Walk speed is in meters per second
     public float walkSpeed = 1f;
     public float runSpeed = 5f;
     public float sprintSpeed = 10f;
+    public float jumpPower = 1f;
+    public float jumpCooldown = 3f;
+    bool jumpOnCooldown = false;
+    bool triggerJump = false;
+    public float gravity = -9.8f;
     public bool walking = false;
-    bool inMenu = false;
 
     public float rotSpeed = 1f;
-    public float mouseSmoothingSpeed = 1f;
 
     public int lookClampUp = -90;
     public int lookClampDown = 90;
+    bool inMenu = false;
     
     void Start(){
         tr = GetComponent<Transform>();
         cam = Camera.main.transform;
+        charController = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
+
+        camEulers = cam.localEulerAngles;
+
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
@@ -38,45 +49,74 @@ public class PlayerMovement : MonoBehaviour
         playerInput.actions["walkToggle"].started += context => walking = !walking;
         playerInput.actions["menu"].started += context => ChangeMenuState();
         playerInput.actions["close"].started += context => ChangeMenuState();
+        playerInput.actions["jump"].started += context => Jump();
     }
 
     void Update(){
         
-        Vector3 moveVector = Quaternion.Euler(0, tr.eulerAngles.y, 0) * moveInput;
+        Vector3 moveVector = Quaternion.Euler(0, tr.eulerAngles.y, 0) * moveInput * Time.deltaTime;
         float speed;
 
         if(walking)
-            speed = walkSpeed * Time.deltaTime;
+            speed = walkSpeed;
         else
-            speed = runSpeed * Time.deltaTime;
+            speed = runSpeed;
         
         if(playerInput.actions["sprint"].IsPressed())
             //Move the transform at sprint speed
-            tr.position += moveVector * sprintSpeed * Time.deltaTime;
+            moveVector *= sprintSpeed;
         else
             //Move the transform at walk speed
-            tr.position += moveVector * speed;
+            moveVector *= speed;
 
-        // Rotate player
-        Quaternion newRotation = Quaternion.Euler(0, rotEulers.y + rot.y * rotSpeed * Time.deltaTime, 0);
-        tr.rotation = Quaternion.Slerp(tr.rotation, newRotation, mouseSmoothingSpeed * Time.deltaTime);
+        charController.Move(moveVector);
+
+
+        velocity.y += gravity * Time.deltaTime;
         
-        float camRotate = rot.x * rotSpeed * Time.deltaTime;
-        newRotation = Quaternion.Euler(Mathf.Clamp(-(rotEulers.x - camRotate), lookClampUp, lookClampDown), 0, 0);
-
-        //Smoothly rotate to new rotation
-        cam.localRotation = Quaternion.Slerp(cam.localRotation, newRotation, mouseSmoothingSpeed * Time.deltaTime);
-
-        //Avoid rotEulers from going beyond the clamp values
-        if(rotEulers.x > (lookClampDown + 1)){
-            rotEulers.x = lookClampDown + 1;
+        if(triggerJump){
+            velocity.y += jumpPower;
+            triggerJump = false;
         }
-        else if(rotEulers.x < (lookClampUp - 1)){
-            rotEulers.x = lookClampUp - 1;
+
+        charController.Move(velocity);
+
+        if(charController.isGrounded && velocity.y < 0){
+            velocity.y = 0;
         }
     }
 
-    //Enables and disables the manu UI and corresponding action maps
+    void LateUpdate(){
+        // camEulers *= Time.deltaTime;
+        
+        if(camEulers.x >= lookClampDown){
+            cam.localEulerAngles = camEulers;
+            rot.x = 0;
+        }
+        if(camEulers.x <= lookClampUp){
+            cam.localEulerAngles = camEulers;
+            rot.x = 0;
+        }
+        
+        cam.Rotate(new Vector3(rot.x, 0, 0) * Time.deltaTime, Space.Self);
+        tr.Rotate(new Vector3(0, rot.y, 0) * Time.deltaTime, Space.Self);
+    }
+
+    void Jump(){
+        if(charController.isGrounded && !jumpOnCooldown){
+            // Jump
+            triggerJump = true;
+            jumpOnCooldown = true;
+            StartCoroutine(JumpCooldown());
+        }
+    }
+
+    IEnumerator JumpCooldown(){
+        yield return new WaitForSeconds(jumpCooldown);
+        jumpOnCooldown = false;
+    }
+
+    //Enables and disables the menu UI and corresponding action maps
     public void ChangeMenuState(){
         inMenu = !inMenu;
 
@@ -105,8 +145,8 @@ public class PlayerMovement : MonoBehaviour
     public void OnLook(InputValue value){
         var v = value.Get<Vector2>();
 
-        rot = new Vector3(v.y, v.x, 0);
-        rotEulers += rot * rotSpeed * Time.deltaTime;
-        // Debug.Log("camEulers: " + camEulers);
+        rot = new Vector3(-1 * v.y, v.x, 0) * rotSpeed;
+        camEulers.x += rot.x * Time.deltaTime;
+        camEulers.x = Mathf.Clamp(camEulers.x, lookClampUp, lookClampDown);
     }
 }
