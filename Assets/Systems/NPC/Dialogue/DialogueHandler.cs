@@ -10,15 +10,12 @@ public static class DialogueHandler
     static DialogueMap.Line rLine;
     static DialogueMap.Line[] rResponses;
 
+    static NPC_DialogueLine rAcceptLine;
+    static NPC_Dialogue rRefuseLine;
     
     static NPC_Data.Interest rInterest;
 
 
-
-
-    //(note to remember where I was)
-    //I want to call AnalyzeContent from DialogueMap and have the function return the NPC_DialogueLine that
-    //DialogueMap should respond with
     public static DialogueMap.Line AnalyzeContent(DialogueMap.Line dialogueLine, DialogueMap.Line[] io, DialogueMap.Line[] rr){
         // Setup
         initiator = null;
@@ -60,7 +57,7 @@ public static class DialogueHandler
     static DialogueMap.Line AnalyzeGoldOffer(NPC_DialogueLine.ContentItem content){
         // converts OFFER CONTENT to INTEREST
        
-        NPC_Data.Interest goldInterest = new NPC_Data.Interest();
+        NPC_Data.Interest goldInterest = new NPC_Data.Interest(0, "", "", "refuse", null, null);
         DialogueMap.Line line = new DialogueMap.Line();
         
         List<NPC_Data.Interest> matchingInterests = new List<NPC_Data.Interest>();
@@ -92,14 +89,15 @@ public static class DialogueHandler
             // interestGoldAmount = int.Parse(item.specifics);
             
             if(item.specifics != "n-a" && int.Parse(item.specifics) <= contentGoldAmount){
-                if(goldInterest.specifics == null){
+                if(goldInterest.specifics == "refuse" || goldInterest.specifics == "n-a")
+                {
                     goldInterest = item;
                 }
-                else if(int.Parse(item.specifics) >= int.Parse(goldInterest.specifics)){
+                else if (int.Parse(item.specifics) >= int.Parse(goldInterest.specifics)){
                     goldInterest = item;
                 }
             }
-            else if(item.specifics == "n-a" && goldInterest.specifics == null){
+            else if(item.specifics == "n-a" && goldInterest.specifics == "refuse"){
                 goldInterest = item;
             }
         }
@@ -110,21 +108,33 @@ public static class DialogueHandler
         
         if(content.specifics != "n-a" && goldInterest.specifics != "n-a"){
 
-            contentGoldAmount = int.Parse(content.specifics);
-            int interestGoldAmount = int.Parse(goldInterest.specifics);
+            if(goldInterest.specifics == "refuse"){
 
-            if(contentGoldAmount >= interestGoldAmount){
-                // Accept offer
-                Debug.Log("NPC accepts offer of " + contentGoldAmount + " gold.");
-                // Gets the responder's acceptance line
-                line = SearchForLineWithContent(rResponses, content);
+                    // Refuse offer
+                    // or maybe use a default response?
+                    line = SearchForLineWithContent(rResponses, new NPC_DialogueLine.ContentItem("offer", "gold", "refuse"));
+
             }
-            else{
-                // Refuse offer
-                Debug.Log("NPC is not interested in a gold offer of " + contentGoldAmount + "; they want at least " + interestGoldAmount + " gold.");
-                // or maybe use a default response?
-                line = SearchForLineWithContent(rResponses, new NPC_DialogueLine.ContentItem("offer", "gold", "refuse"));
+            else if(goldInterest.specifics!= "n-a"){
+
+                contentGoldAmount = int.Parse(content.specifics);
+                int interestGoldAmount = int.Parse(goldInterest.specifics);
+
+                if(contentGoldAmount >= interestGoldAmount){
+                    // Accept offer
+                    Debug.Log("NPC accepts offer of " + contentGoldAmount + " gold.");
+                    // Gets the responder's acceptance line
+                    line = SearchForLineWithContent(rResponses, content);
+                }
+                else{
+                    // Refuse offer
+                    Debug.Log("NPC is not interested in a gold offer of " + contentGoldAmount + "; they want at least " + interestGoldAmount + " gold.");
+                    // or maybe use a default response?
+                    line = SearchForLineWithContent(rResponses, new NPC_DialogueLine.ContentItem("offer", "gold", "refuse"));
+                }
+
             }
+
         }
         else if(content.specifics != "n-a"){
             //Implement support for multiple different interests with varying amounts of gold
@@ -207,12 +217,21 @@ public static class DialogueHandler
             // No dialogue lines found for this NPC that contain the matching content
             // Use a fallback line instead (defined in the line with the offer?)
             if(contentLookingFor.specifics == "refuse"){
-                // Use interest refuse line
-                return new DialogueMap.Line(dialogueArray[0].speaker, rInterest.refuseLine.content, rInterest.refuseLine.dialogue);
+                if(rInterest.refuseLine){
+                    // Use interest refuse line
+                    return new DialogueMap.Line(dialogueArray[0].speaker, rInterest.refuseLine.content, rInterest.refuseLine.dialogue);
+                }
+                else{
+                    //Use generic refuse line
+                    return new DialogueMap.Line(dialogueArray[0].speaker, new NPC_DialogueLine.ContentItem[1]{new NPC_DialogueLine.ContentItem(contentLookingFor.type, contentLookingFor.subtype, contentLookingFor.specifics)}, "No thanks.");
+                }
+
             }
             else{
-                // Use interest accept line
-                return new DialogueMap.Line(dialogueArray[0].speaker, rInterest.acceptLine.content, rInterest.acceptLine.dialogue);
+                // if(rInterest.acceptLine){
+                    // Use interest accept line
+                    return new DialogueMap.Line(dialogueArray[0].speaker, rInterest.acceptLine.content, rInterest.acceptLine.dialogue);
+                // }
             }
             
         }

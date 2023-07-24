@@ -24,6 +24,7 @@ public class CyclethroughMovement : MonoBehaviour
     // Start is called before the first frame update
     void OnEnable()
     {
+        Time.timeScale = 1;
         movement.Enable();
         nextObject.Enable();
         previousObject.Enable();

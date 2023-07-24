@@ -28,7 +28,7 @@ public class PlayerMovement : MonoBehaviour
     public float gravity = -9.8f;
     public bool walking = false;
 
-    public float rotSpeed = 1f;
+    public float rotSpeed = 45f;
 
     public int lookClampUp = -90;
     public int lookClampDown = 90;
@@ -50,40 +50,47 @@ public class PlayerMovement : MonoBehaviour
         playerInput.actions["menu"].started += context => ChangeMenuState();
         playerInput.actions["close"].started += context => ChangeMenuState();
         playerInput.actions["jump"].started += context => Jump();
+        
+        if(!inMenu)
+            Time.timeScale = 1;
     }
 
-    void Update(){
-        
-        Vector3 moveVector = Quaternion.Euler(0, tr.eulerAngles.y, 0) * moveInput * Time.deltaTime;
-        float speed;
+    void FixedUpdate(){
+        if(Time.timeScale != 0){
+            Vector3 moveVector = Quaternion.Euler(0, tr.eulerAngles.y, 0) * moveInput * Time.deltaTime;
+            float speed;
 
-        if(walking)
-            speed = walkSpeed;
-        else
-            speed = runSpeed;
-        
-        if(playerInput.actions["sprint"].IsPressed())
-            //Move the transform at sprint speed
-            moveVector *= sprintSpeed;
-        else
-            //Move the transform at walk speed
-            moveVector *= speed;
+            if(walking)
+                speed = walkSpeed;
+            else
+                speed = runSpeed;
+            
+            if(playerInput.actions["sprint"].IsPressed())
+                //Move the transform at sprint speed
+                moveVector *= sprintSpeed;
+            else
+                //Move the transform at walk speed
+                moveVector *= speed;
 
-        charController.Move(moveVector);
+            charController.Move(moveVector);
 
 
-        velocity.y += gravity * Time.deltaTime;
-        
-        if(triggerJump){
-            velocity.y += jumpPower;
-            triggerJump = false;
+
+            if(triggerJump){
+                velocity.y = jumpPower * Time.deltaTime;
+                triggerJump = false;
+            }
+            else{
+                velocity.y += gravity * Time.deltaTime;
+            }
+
+            charController.Move(velocity);
+
+            if(charController.isGrounded && velocity.y < 0){
+                velocity.y = 0;
+            }
         }
 
-        charController.Move(velocity);
-
-        if(charController.isGrounded && velocity.y < 0){
-            velocity.y = 0;
-        }
     }
 
     void LateUpdate(){
@@ -103,10 +110,11 @@ public class PlayerMovement : MonoBehaviour
     }
 
     void Jump(){
-        if(charController.isGrounded && !jumpOnCooldown){
+        if(velocity.y == 0 && !jumpOnCooldown && Time.timeScale != 0){
             // Jump
             triggerJump = true;
             jumpOnCooldown = true;
+
             StartCoroutine(JumpCooldown());
         }
     }
@@ -125,6 +133,7 @@ public class PlayerMovement : MonoBehaviour
             Cursor.visible = true;
             playerInput.SwitchCurrentActionMap("menu");
             pauseMenu.SetActive(true);
+            Time.timeScale = 0;
             //PauseMenu housekeeping function that sets all rebind text
             GameObject.FindGameObjectWithTag("RebindManager").GetComponent<RebindManager>().UpdateAllRebindText();
         }
@@ -133,6 +142,7 @@ public class PlayerMovement : MonoBehaviour
             Cursor.visible = false;
             playerInput.SwitchCurrentActionMap("player_controls");
             pauseMenu.SetActive(false);
+            Time.timeScale = 1;
         }
     }
 
