@@ -1,4 +1,0 @@
-<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <Style src="project://database/Assets/Systems/NPC/Dialogue/UI/DialogueBox.uss?fileID=7433441132597879392&amp;guid=33691ec8c70da43a8b014e38d485cfe7&amp;type=3#DialogueBox" />
-    <ui:Label text="gotsr" display-tooltip-when-elided="true" name="text" />
-</ui:UXML>

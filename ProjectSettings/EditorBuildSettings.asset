@@ -6,15 +6,15 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 0
-    path: Assets/Scenes/Development/Combat Testing.unity
+    path: Assets/_Wynatia Game/Scenes/Development/Combat Testing.unity
     guid: 95e328b560df34e3faa0a6d02985d802
   - enabled: 0
-    path: Assets/Scenes/Development/DevMenu.unity
+    path: Assets/_Wynatia Game/Scenes/Development/DevMenu.unity
     guid: 0ac24f6d0592149edad60dcf425f9a87
   - enabled: 0
-    path: Assets/Scenes/Development/MapMagic Testing.unity
+    path: Assets/_Wynatia Game/Scenes/Development/MapMagic Testing.unity
     guid: 7321d681e86c843609227b2e31745a26
   - enabled: 1
-    path: Assets/Scenes/Development/NPC Testing.unity
+    path: Assets/_Wynatia Game/Scenes/Development/NPC Testing.unity
     guid: c45f74985c3ab4427b6454887db3a895
   m_configObjects: {}
