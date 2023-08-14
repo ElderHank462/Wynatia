@@ -13,5 +13,9 @@ MonoBehaviour:
   m_Name: Sphere
   m_EditorClassIdentifier: 
   itemName: Sphere
-  type: object
+  type: 1
+  effect: 0
+  itemLevel: 0
   value: 0
+  worldObject: {fileID: 4747289837151570195, guid: 8ba43bce647904564936fb34baf6951d,
+    type: 3}

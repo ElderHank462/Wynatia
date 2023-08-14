@@ -8,14 +8,17 @@ public class DropItemMenu : MonoBehaviour
 {
     public Slider dropQuantitySlider;
     public TextMeshProUGUI quantityText;
+    public TextMeshProUGUI confirmationText;
 
-    public void Setup(int itemQuantity){
+    public void Setup(int itemQuantity, string itemName){
+        confirmationText.SetText("Are you sure you want to drop " + itemName + "?");
+
         if(itemQuantity > 1){
             dropQuantitySlider.gameObject.SetActive(true);
             quantityText.gameObject.SetActive(true);
             dropQuantitySlider.maxValue = itemQuantity;
             dropQuantitySlider.value = 1;
-            SetText(dropQuantitySlider.value);
+            SetQuantityText(dropQuantitySlider.value);
         }
         else{
             dropQuantitySlider.maxValue = itemQuantity;
@@ -26,7 +29,7 @@ public class DropItemMenu : MonoBehaviour
         
     }
 
-    public void SetText(float num){
+    public void SetQuantityText(float num){
         quantityText.SetText(Mathf.RoundToInt(num).ToString());
     }
 }

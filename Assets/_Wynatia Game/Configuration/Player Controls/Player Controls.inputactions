@@ -6,7 +6,7 @@
             "id": "965c660f-cc5a-443e-98e4-35b045f1f8c2",
             "actions": [
                 {
-                    "name": "movement",
+                    "name": "Movement",
                     "type": "Value",
                     "id": "04a1d61d-8c97-42d7-8049-3c1c37ef7f53",
                     "expectedControlType": "Vector2",
@@ -15,7 +15,7 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "sprint",
+                    "name": "Sprint",
                     "type": "Button",
                     "id": "650dca7b-7132-44e0-bf8a-0c8a49edc4c3",
                     "expectedControlType": "Button",
@@ -24,9 +24,72 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "walkToggle",
+                    "name": "Toggle Walk",
                     "type": "Button",
                     "id": "9467fbd8-ee87-4d66-84db-10002e5f2357",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Jump",
+                    "type": "Button",
+                    "id": "9037eb13-74a3-494e-aaf0-28e35caf79ef",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Sheathe Weapon",
+                    "type": "Button",
+                    "id": "68ec845e-93a4-4313-8ff7-6a86dd62e4e1",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Melee Attack",
+                    "type": "Button",
+                    "id": "5a7c56ef-9026-405b-8409-14fb8fbb89e4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Tap(duration=0.19)",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Melee Power Attack",
+                    "type": "Button",
+                    "id": "575acf46-5c01-45c0-a040-22d3b9d6b085",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold(duration=0.2)",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Inventory",
+                    "type": "Button",
+                    "id": "eef72799-9ae9-4f58-a090-cde127cc8483",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Interact",
+                    "type": "Button",
+                    "id": "b8592974-0793-4846-8338-88d1fdb46cf4",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "menu",
+                    "type": "Button",
+                    "id": "49abb355-87ca-4204-8a7e-24bdc479d1e5",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -40,51 +103,6 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
-                },
-                {
-                    "name": "menu",
-                    "type": "Button",
-                    "id": "49abb355-87ca-4204-8a7e-24bdc479d1e5",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "jump",
-                    "type": "Button",
-                    "id": "9037eb13-74a3-494e-aaf0-28e35caf79ef",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "sheathe",
-                    "type": "Button",
-                    "id": "68ec845e-93a4-4313-8ff7-6a86dd62e4e1",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "meleeAttack",
-                    "type": "Button",
-                    "id": "5a7c56ef-9026-405b-8409-14fb8fbb89e4",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Tap(duration=0.19)",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "meleePowerAttack",
-                    "type": "Button",
-                    "id": "575acf46-5c01-45c0-a040-22d3b9d6b085",
-                    "expectedControlType": "Button",
-                    "processors": "",
-                    "interactions": "Hold(duration=0.2)",
-                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -95,7 +113,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "movement",
+                    "action": "Movement",
                     "isComposite": true,
                     "isPartOfComposite": false
                 },
@@ -106,7 +124,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse_Keyboard",
-                    "action": "movement",
+                    "action": "Movement",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -117,7 +135,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse_Keyboard",
-                    "action": "movement",
+                    "action": "Movement",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -128,7 +146,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse_Keyboard",
-                    "action": "movement",
+                    "action": "Movement",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -139,7 +157,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse_Keyboard",
-                    "action": "movement",
+                    "action": "Movement",
                     "isComposite": false,
                     "isPartOfComposite": true
                 },
@@ -150,7 +168,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse_Keyboard",
-                    "action": "sprint",
+                    "action": "Sprint",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -161,7 +179,73 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse_Keyboard",
-                    "action": "walkToggle",
+                    "action": "Toggle Walk",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "bddee563-d55b-4b56-af5e-900c6bf93672",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ace8db4c-9983-479f-b7b6-95279dfba1a9",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Sheathe Weapon",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "450e349b-c772-4b65-9d16-3015cd7b7887",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Melee Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6566e8eb-bcc0-4550-ab83-cd68b8ab9447",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Melee Power Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7447c82e-bd04-4bf3-87cd-11067b1edec1",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Inventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "244c8342-4138-4e2c-b6e0-47da1c11c491",
+                    "path": "<Keyboard>/u",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Interact",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -184,50 +268,6 @@
                     "processors": "",
                     "groups": "Mouse_Keyboard",
                     "action": "look",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "bddee563-d55b-4b56-af5e-900c6bf93672",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Mouse_Keyboard",
-                    "action": "jump",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "ace8db4c-9983-479f-b7b6-95279dfba1a9",
-                    "path": "<Keyboard>/p",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Mouse_Keyboard",
-                    "action": "sheathe",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "450e349b-c772-4b65-9d16-3015cd7b7887",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Mouse_Keyboard",
-                    "action": "meleeAttack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "6566e8eb-bcc0-4550-ab83-cd68b8ab9447",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Mouse_Keyboard",
-                    "action": "meleePowerAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

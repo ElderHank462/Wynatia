@@ -5,7 +5,38 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Inventory Item")]
 public class Item : ScriptableObject
 {
+    
+    public enum ItemType{
+        Currency,
+        Trinket,
+        MagicTrinket,
+        Necklace,
+        Bracelet,
+        Ring,
+        Materials,
+        Potion,
+        Food,
+        Weapon,
+        Shield,
+        MagicWeapon,
+        Clothing,
+        MagicClothing,
+        Headwear,
+        Armor,
+        MagicArmor
+    }
+
+    public enum ItemEffect{
+        None,
+        Heal
+    }
+
+    
     public string itemName;
-    public string type;
+    public ItemType type;
+    public ItemEffect effect;
+    public int itemLevel;
     public int value = 0;
+    public GameObject worldObject;
+    public bool twoHanded = false;
 }

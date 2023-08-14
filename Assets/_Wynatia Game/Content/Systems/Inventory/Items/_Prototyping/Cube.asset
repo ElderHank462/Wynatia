@@ -13,5 +13,9 @@ MonoBehaviour:
   m_Name: Cube
   m_EditorClassIdentifier: 
   itemName: Cube
-  type: object
+  type: 1
+  effect: 0
+  itemLevel: 0
   value: 0
+  worldObject: {fileID: 8318475141047396784, guid: 39d1ee8c86bea4def89adaf1ef1231bb,
+    type: 3}

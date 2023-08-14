@@ -1134,7 +1134,7 @@ GameObject:
   - component: {fileID: 509789603}
   - component: {fileID: 509789607}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: destructible_Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

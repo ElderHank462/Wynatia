@@ -40,16 +40,20 @@ public class PlayerMovement : MonoBehaviour
         charController = GetComponent<CharacterController>();
         playerInput = GetComponent<PlayerInput>();
 
+        // Duplicate of code from 'LoadBindings' function in ControlsManager
+        if(PlayerPrefs.HasKey("Keybindings")){
+            var rebinds = PlayerPrefs.GetString("Keybindings");
+            playerInput.actions.LoadBindingOverridesFromJson(rebinds);
+        }
+
         camEulers = cam.localEulerAngles;
 
 
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
 
-        playerInput.actions["walkToggle"].started += context => walking = !walking;
-        playerInput.actions["menu"].started += context => ChangeMenuState();
-        playerInput.actions["close"].started += context => ChangeMenuState();
-        playerInput.actions["jump"].started += context => Jump();
+        playerInput.actions["Toggle Walk"].performed += context => walking = !walking;
+        playerInput.actions["Jump"].performed += context => Jump();
         
         if(!inMenu)
             Time.timeScale = 1;
@@ -124,27 +128,7 @@ public class PlayerMovement : MonoBehaviour
         jumpOnCooldown = false;
     }
 
-    //Enables and disables the menu UI and corresponding action maps
-    public void ChangeMenuState(){
-        inMenu = !inMenu;
 
-        if(inMenu){
-            Cursor.lockState = CursorLockMode.Confined;
-            Cursor.visible = true;
-            playerInput.SwitchCurrentActionMap("menu");
-            pauseMenu.SetActive(true);
-            Time.timeScale = 0;
-            //PauseMenu housekeeping function that sets all rebind text
-            GameObject.FindGameObjectWithTag("RebindManager").GetComponent<RebindManager>().UpdateAllRebindText();
-        }
-        else{
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-            playerInput.SwitchCurrentActionMap("player_controls");
-            pauseMenu.SetActive(false);
-            Time.timeScale = 1;
-        }
-    }
 
     public void OnMovement(InputValue value){
         var v = value.Get<Vector2>();

@@ -6,14 +6,16 @@ TagManager:
   tags:
   - RebindManager
   - NPC
+  - Item Container
+  - Inventory Item
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Inventory Item
   - Water
   - UI
-  - 
+  - Player
   - 
   - 
   - 

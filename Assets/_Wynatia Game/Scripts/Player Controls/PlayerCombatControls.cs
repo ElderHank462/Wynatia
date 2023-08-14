@@ -12,12 +12,12 @@ public class PlayerCombatControls : MonoBehaviour
     void Start()
     {
         playerInput = GetComponent<PlayerInput>();
+        combatAgent = GetComponentInChildren<PlayerCombatAgent>();
 
-        playerInput.actions["sheathe"].performed += _ => SheatheUnsheathe();
-        playerInput.actions["meleeAttack"].performed += _ => MeleeAttack();
-        playerInput.actions["meleePowerAttack"].performed += _ => MeleePowerAttack();
+        playerInput.actions["Sheathe Weapon"].performed += _ => SheatheUnsheathe();
+        playerInput.actions["Melee Attack"].performed += _ => MeleeAttack();
+        playerInput.actions["Melee Power Attack"].performed += _ => MeleePowerAttack();
 
-        combatAgent = Camera.main.transform.Find("CombatAgent").GetComponent<PlayerCombatAgent>();
     }
 
     void SheatheUnsheathe(){

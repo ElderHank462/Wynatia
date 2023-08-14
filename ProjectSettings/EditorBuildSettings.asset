@@ -14,7 +14,10 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/_Wynatia Game/Scenes/Development/MapMagic Testing.unity
     guid: 7321d681e86c843609227b2e31745a26
-  - enabled: 1
+  - enabled: 0
     path: Assets/_Wynatia Game/Scenes/Development/NPC Testing.unity
     guid: c45f74985c3ab4427b6454887db3a895
+  - enabled: 1
+    path: Assets/_Wynatia Game/Scenes/Development/Inventory Testing.unity
+    guid: 754cb89ad11cd41fd8a3c4566386d4e0
   m_configObjects: {}
