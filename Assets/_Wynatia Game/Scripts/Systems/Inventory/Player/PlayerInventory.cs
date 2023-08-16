@@ -69,7 +69,7 @@ public class PlayerInventory : MonoBehaviour
                 }
 
                 pickupItemText.SetText(hoveredItem.scriptableObject.itemName);
-                pickupBindingText.SetText(GetComponent<PlayerInput>().currentActionMap.FindAction("pickupItem").GetBindingDisplayString());
+                pickupBindingText.SetText(GetComponent<PlayerInput>().currentActionMap.FindAction("Interact").GetBindingDisplayString());
                 pickupPopup.SetActive(true);
             }
             else{
@@ -116,11 +116,12 @@ public class PlayerInventory : MonoBehaviour
 
     // Called via PlayerInput module
     void OnInventory(){
-        if(!inventoryWindow.activeSelf){
+        inventoryWindow.SetActive(!inventoryWindow.activeSelf);
+
+        if(inventoryWindow.activeSelf){
             Pause.PauseManagement.Pause();
         }
-        inventoryWindow.SetActive(!inventoryWindow.activeSelf);
-        if(!inventoryWindow.activeSelf){
+        else{
             Pause.PauseManagement.Unpause();
             SaveInventory();
             StartCoroutine(InstantiateWorldItems(dropPoint));

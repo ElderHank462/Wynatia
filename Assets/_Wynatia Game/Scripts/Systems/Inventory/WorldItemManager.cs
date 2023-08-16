@@ -11,8 +11,8 @@ public class WorldItemManager : MonoBehaviour
     void Start(){
         if(ES3.KeyExists("World Items List"))
             Load();
-        else
-            Save();
+        // // else
+        // //     Save();
     }
 
     void OnApplicationQuit(){
@@ -22,7 +22,18 @@ public class WorldItemManager : MonoBehaviour
     void Save(){
         worldItems.Clear();
         foreach(Transform child in transform){
-            worldItems.Add(child.gameObject);
+            // Created a function in WorldItem that gets the contact point with the lowest y position.
+            // Need to save that as the gameobject position instead of the gameobjects actual position.
+            // Maybe have it allocated a new gamobject with identical properties to the real one and set
+            // the position of that one?
+            child.GetComponent<WorldItem>().UpdateSavePosition();
+    
+            GameObject temp = child.gameObject;
+
+            temp.transform.position = child.GetComponent<WorldItem>().positionToSave;
+            temp.transform.rotation = child.rotation;
+
+            worldItems.Add(temp);
         }
         ES3.Save("World Items List", worldItems);
     }

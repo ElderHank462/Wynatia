@@ -9,7 +9,6 @@ public class PlayerMovement : MonoBehaviour
     Transform cam;
     CharacterController charController;
     PlayerInput playerInput;
-    public GameObject pauseMenu;
 
     Vector3 moveInput;
     Vector3 rot;
@@ -33,6 +32,7 @@ public class PlayerMovement : MonoBehaviour
     public int lookClampUp = -90;
     public int lookClampDown = 90;
     bool inMenu = false;
+    private bool sprinting = false;
     
     void Start(){
         tr = GetComponent<Transform>();
@@ -54,6 +54,8 @@ public class PlayerMovement : MonoBehaviour
 
         playerInput.actions["Toggle Walk"].performed += context => walking = !walking;
         playerInput.actions["Jump"].performed += context => Jump();
+        playerInput.actions["Sprint"].performed += context => ToggleSprint(true);
+        playerInput.actions["Sprint"].canceled += context => ToggleSprint(false);
         
         if(!inMenu)
             Time.timeScale = 1;
@@ -69,7 +71,7 @@ public class PlayerMovement : MonoBehaviour
             else
                 speed = runSpeed;
             
-            if(playerInput.actions["sprint"].IsPressed())
+            if(sprinting)
                 //Move the transform at sprint speed
                 moveVector *= sprintSpeed;
             else
@@ -95,6 +97,13 @@ public class PlayerMovement : MonoBehaviour
             }
         }
 
+    }
+
+    void ToggleSprint(bool s){
+        if(s)
+            sprinting = true;
+        else
+            sprinting = false;
     }
 
     void LateUpdate(){

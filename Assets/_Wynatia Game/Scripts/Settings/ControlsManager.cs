@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.InputSystem;
 
 public class ControlsManager : MonoBehaviour
@@ -11,6 +12,7 @@ public class ControlsManager : MonoBehaviour
     public Transform rebinderContainer;
     [SerializeField] GameObject applyButtonCover;
     [SerializeField] GameObject undoButtonCover;
+    [SerializeField] UIPopup bindingConflictPopup;
 
     private PlayerInput playerInputComponent;
     private PauseMenu pauseMenu;
@@ -19,6 +21,7 @@ public class ControlsManager : MonoBehaviour
     // called whenever script's gameobject is enabled
     void OnEnable()
     {
+        
         playerInputComponent = FindObjectOfType<PlayerInput>();
         pauseMenu = FindObjectOfType<PauseMenu>();
 
@@ -27,6 +30,7 @@ public class ControlsManager : MonoBehaviour
         
         // (if bindings don't automatically save)
         // Load saved bindings from playerprefs
+        LoadBindings();
         
         // Generate rebinders
         if(rebinderContainer.childCount == 0){
@@ -54,11 +58,21 @@ public class ControlsManager : MonoBehaviour
                 
             }
         }
+
+
     }
 
     // Setup for single binding action
     void SetupRebinder(GameObject rebinderToSetup, int actionIndex){
-        rebinderToSetup.GetComponent<Rebinder>().Setup(playerInputComponent.actions.actionMaps[0], actionIndex, rebindPopup, this);
+        bool hold = false;
+        string key = playerInputComponent.actions.actionMaps[0].actions[actionIndex].name + "_holdEnabled";
+        if(PlayerPrefs.HasKey(key)){
+            if(PlayerPrefs.GetInt(key) == 1){
+                hold = true;
+            }
+        }
+
+        rebinderToSetup.GetComponent<Rebinder>().Setup(playerInputComponent.actions.actionMaps[0], actionIndex, rebindPopup, this, hold);
     }
     // Setup as a rebinder for a composite part
     void SetupRebinder(GameObject rebinderToSetup, int actionIndex, int bindingIndex){
@@ -66,6 +80,9 @@ public class ControlsManager : MonoBehaviour
     }
 // Standard binding overload
     public void OnRebind(InputAction actionToRebind, Rebinder rebinder){
+        IEnumerable<InputBinding> originalBindings = playerInputComponent.actions.bindings;
+
+
         // Enable UI that displays the action that is being rebound and blocks other inputs
         rebindPopup.SetActive(true);
         rebindPopup.GetComponentInChildren<TextMeshProUGUI>().SetText("Rebinding '" + actionToRebind.name + ".' \n Press Escape to cancel.");
@@ -73,14 +90,40 @@ public class ControlsManager : MonoBehaviour
         var rebind = actionToRebind.PerformInteractiveRebinding()
             .WithCancelingThrough("<Keyboard>/escape")
             .OnCancel(operation => { rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();})
-            .OnComplete(operation => { rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();});
+            .OnComplete(operation => { CheckForConflicts(); rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();});
 
         rebind.Start();
+        
+        bool settingsModified = true;
 
-        SetupSavePopup();
+// IF THIS WORKS, COPY IT TO THE OTHER ONREBIND OVERLOAD
+        void CheckForConflicts(){
+            InputBinding newBinding = playerInputComponent.actions[actionToRebind.name].bindings[0];
+            foreach (var binding in originalBindings)
+            {
+                if(binding.effectivePath == newBinding.effectivePath){
+                    if(binding.action != actionToRebind.name){
+                        // Undo rebind, show warning on UI
+                        bindingConflictPopup.SetText("'"+ binding.ToDisplayString() + "' is already in use by another action. To bind '" + binding.ToDisplayString() +
+                        "' to this action, either bind '" + binding.action + "' to a different key or select an alternate key to bind '" + actionToRebind.name + "' to.");
+                        bindingConflictPopup.gameObject.SetActive(true);
+
+                        // (binding to apply, binding group, binding to override)
+                        actionToRebind.ApplyBindingOverride(rebinder.originalBinding.path, null, newBinding.path);
+                    }
+                    else{
+                        settingsModified = false;
+                    }
+                }
+            }
+        }
+
+        SetupSavePopup(settingsModified);
     }
 // Overload for a binding that is part of a composite
     public void OnRebind(InputAction actionToRebind, Rebinder rebinder, int bindingIndex){
+        IEnumerable<InputBinding> originalBindings = playerInputComponent.actions.bindings;
+
         // Enable UI that displays the action that is being rebound and blocks other inputs
         rebindPopup.SetActive(true);
         rebindPopup.GetComponentInChildren<TextMeshProUGUI>().SetText("Rebinding '" + actionToRebind.name + ".' \n Press Escape to cancel.");
@@ -88,17 +131,53 @@ public class ControlsManager : MonoBehaviour
         var rebind = actionToRebind.PerformInteractiveRebinding(bindingIndex)
             .WithCancelingThrough("<Keyboard>/escape")
             .OnCancel(operation => { rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();})
-            .OnComplete(operation => { rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();});
+            .OnComplete(operation => { CheckForConflicts(); rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();});
 
         rebind.Start();
 
-        SetupSavePopup();
+        bool settingsModified = true;
+
+        void CheckForConflicts(){
+            InputBinding newBinding = playerInputComponent.actions[actionToRebind.name].bindings[bindingIndex];
+            foreach (var binding in originalBindings)
+            {
+                if(binding.effectivePath == newBinding.effectivePath){
+                    if(binding.action != actionToRebind.name){
+                        // Undo rebind, show warning on UI
+                        // bindingConflictPopup.SetText("'"+ binding.ToDisplayString() + "' is already in use by another action. To bind '" + binding.ToDisplayString() +
+                        // "' to this action, either bind '" + binding.action + "' to a different key or select an alternate key to bind '" + actionToRebind.name + "' to.");
+                        // bindingConflictPopup.gameObject.SetActive(true);
+                        ResolveBindingConflict(actionToRebind, rebinder, binding, newBinding);
+                        
+                        // actionToRebind.ApplyBindingOverride(rebinder.originalBinding.path, null, newBinding.path);
+                    }
+                    else if (binding.isPartOfComposite && binding.id != newBinding.id){
+                        // If binding is part of the same action as the new binding (and not the same binding as the new binding),
+                        // register conflict
+                        ResolveBindingConflict(actionToRebind, rebinder, binding, newBinding);
+                    }
+                    else{
+                        settingsModified = false;
+                    }
+                }
+            }
+        }
+
+        SetupSavePopup(settingsModified);
     }
 
-    void SetupSavePopup(){
-        pauseMenu.FlagSettingsAsModified();
-        applyButtonCover.SetActive(false);
-        undoButtonCover.SetActive(false);
+    void ResolveBindingConflict(InputAction actionToReset, Rebinder r, InputBinding conflictingBinding, InputBinding newBinding){
+        bindingConflictPopup.SetText("'"+ conflictingBinding.ToDisplayString() + "' is already in use by another action. To bind '" + conflictingBinding.ToDisplayString() +
+            "' to this action, either bind '" + conflictingBinding.action + "' to a different key or select an alternate key to bind '" + actionToReset.name + "' to.");
+        bindingConflictPopup.gameObject.SetActive(true);
+        // (binding to apply, binding group, binding to override)
+        actionToReset.ApplyBindingOverride(r.originalBinding.path, null, newBinding.path);
+    }
+
+    void SetupSavePopup(bool settingsModified = true){
+        if(settingsModified){
+            FlagSaM();
+        }
         pauseMenu.saveSettingsPopup.SetOnClick(0, UndoChanges, pauseMenu.Unpause);
         pauseMenu.saveSettingsPopup.SetOnClick(1, SaveBindings, pauseMenu.Unpause);
         pauseMenu.saveSettingsPopup.SetText("Do you want to save your changes?");
@@ -112,12 +191,31 @@ public class ControlsManager : MonoBehaviour
             Rebinder rebinder = child.GetComponent<Rebinder>();
             rebinder.action.ApplyBindingOverride(rebinder.bIndex, rebinder.originalBinding.path);
             rebinder.UpdateText();
+            rebinder.RecallInitialState();
         }
+    }
+
+    public void FlagSaM(){
+        pauseMenu.FlagSettingsAsModified();
+        applyButtonCover.SetActive(false);
+        undoButtonCover.SetActive(false);
     }
 
     public void SaveBindings(){
         var rebinds = playerInputComponent.actions.SaveBindingOverridesAsJson();
         PlayerPrefs.SetString("Keybindings", rebinds);
+
+        foreach (Transform rebinder in rebinderContainer)
+        {
+            Rebinder r = rebinder.GetComponent<Rebinder>();
+            if(r.holdToggle.isOn){
+                PlayerPrefs.SetInt(r.action.name + "_holdEnabled", 1);
+                PlayerPrefs.SetFloat(r.action.name + "_holdTime", r.holdTime);
+            }
+            else{
+                PlayerPrefs.SetInt(r.action.name + "_holdEnabled", 0);
+            }
+        }
     }
 
     void LoadBindings(){

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Pause
 {
-    public class PauseManagement{
+    public static class PauseManagement{
         private static float unpausedTimeScale;
         public static bool paused = false;
         

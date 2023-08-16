@@ -12,10 +12,11 @@ public class Rebinder : MonoBehaviour
     [SerializeField] private Button rebindButton;
     [SerializeField] private TextMeshProUGUI actionLabel;
     [SerializeField] private TextMeshProUGUI bindingText;
-    [SerializeField] private Toggle holdToggle;
-    [SerializeField] private Slider holdTimeSlider;
+    public Toggle holdToggle;
+    public Slider holdTimeSlider;
     [SerializeField] private TextMeshProUGUI holdTimeText;
-    private float holdTime = 0.5f;
+    // public bool holdEnabled = false;
+    public float holdTime = 0.5f;
 
     public InputAction action;
     private GameObject rebindPopup;
@@ -24,12 +25,24 @@ public class Rebinder : MonoBehaviour
 
     public int bIndex;
 
-    public void Setup(InputActionMap actionMap, int actionIndex, GameObject popup, ControlsManager cm){
+    private bool holdEnabledOnInitialize = false;
+
+
+
+    public void Setup(InputActionMap actionMap, int actionIndex, GameObject popup, ControlsManager cm, bool hold){
         #region Display setup
         actionLabel.SetText(actionMap.actions[actionIndex].name);
         bindingText.SetText(actionMap.actions[actionIndex].GetBindingDisplayString());
 
-        holdTimeSlider.interactable = false;
+        holdEnabledOnInitialize = hold;
+
+        holdTimeSlider.interactable = hold;
+        holdToggle.SetIsOnWithoutNotify(hold);
+        if(PlayerPrefs.HasKey(actionMap.actions[actionIndex].name + "_holdTime")){
+            holdTime = PlayerPrefs.GetFloat(actionMap.actions[actionIndex].name + "_holdTime");
+        }
+
+        holdTimeSlider.SetValueWithoutNotify(holdTime);
         holdTimeText.SetText(holdTime.ToString() + "s");
         #endregion
 
@@ -89,11 +102,32 @@ public class Rebinder : MonoBehaviour
         else{
             action.ApplyBindingOverride(new InputBinding{ overrideInteractions = "press"});
         }
+
+        controlsManager.FlagSaM();
+        UpdateText();
     }
 
     public void OnHoldTimeSliderChanged(float value){
-        holdTime = value;
+        holdTime = Mathf.Round(value * 10) * 0.1f;
         holdTimeText.SetText(holdTime.ToString() + "s");
+        action.ApplyBindingOverride(new InputBinding{ overrideInteractions = $"hold(duration={holdTime})"});
+
+        controlsManager.FlagSaM();
+        UpdateText();
+    }
+
+
+    public void RecallInitialState(){
+        if(PlayerPrefs.HasKey(action.name + "_holdEnabled")){
+            if(PlayerPrefs.GetInt(action.name + "_holdEnabled") == 1){
+                holdEnabledOnInitialize = true;
+            }
+            else{
+                holdEnabledOnInitialize = false;
+            }
+        }
+        holdTimeSlider.interactable = holdEnabledOnInitialize;
+        holdToggle.isOn = holdEnabledOnInitialize;
     }
 
     IEnumerator PreventExtraneousRebinding(){
@@ -116,5 +150,6 @@ public class Rebinder : MonoBehaviour
             originalBinding = action.bindings[bIndex];
         }
     }
+
 
 }

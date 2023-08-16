@@ -36,7 +36,7 @@ public class ItemInspector : MonoBehaviour, IPointerDownHandler, IPointerUpHandl
         itemSpawnPoint.localPosition = new Vector3(0, 0, startingZ);
         itemSpawnPoint.localEulerAngles = startingEulers;
         GameObject itemModel = Instantiate(g, itemSpawnPoint);
-        itemModel.GetComponent<Rigidbody>().isKinematic = true;
+        itemModel.GetComponent<WorldItem>().instanceKinematic = true;
     }
 
     public void OnPointerDown(PointerEventData eventData){

@@ -13,6 +13,7 @@ public class PauseMenu : MonoBehaviour
     public GameObject pauseMenu;
     public GameObject displayMenu;
     public GameObject controlsMenu;
+    public GameObject[] popupsThatMaintainPause;
     public UIPopup saveSettingsPopup;
 
     private PlayerInput playerInput;
@@ -40,7 +41,14 @@ public class PauseMenu : MonoBehaviour
 
     //Enables and disables the menu UI and corresponding action maps
     public void ChangePauseMenuState(){
-        
+        bool dontUnpause = false;
+        foreach (var item in popupsThatMaintainPause)
+        {
+            if(item.activeSelf){
+                dontUnpause = true;
+            }
+        }
+
         if(!Pause.PauseManagement.paused){
             Pause.PauseManagement.Pause();
             playerInput.SwitchCurrentActionMap("menu");
@@ -49,6 +57,12 @@ public class PauseMenu : MonoBehaviour
         else if(settingsModified){
             saveSettingsPopup.gameObject.SetActive(true);
             settingsModified = false;
+        }
+        else if(dontUnpause && pauseMenu.activeSelf){
+            saveSettingsPopup.gameObject.SetActive(false);
+            playerInput.SwitchCurrentActionMap("player_controls");
+            pauseMenu.SetActive(false);
+            return;
         }
         else{
             Unpause();
