@@ -2,11 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
 
 public class GraphicsManager : MonoBehaviour
 {
+    Camera playerCamera;
+    
     [SerializeField] private TMP_Dropdown qualityLevelDropdown;
     [SerializeField] private TMP_Dropdown resolutionDropdown;
+    [SerializeField] private TMP_Text fieldOfViewDisplayText;
+    [SerializeField] private Slider fieldOfViewSlider;
 
     Resolution[] resolutions;
     Resolution defaultResolution;
@@ -49,8 +54,14 @@ public class GraphicsManager : MonoBehaviour
         resolutionDropdown.SetValueWithoutNotify(defaultResolutionIndex);
         #endregion
     
-        
+        playerCamera = Camera.main;
     
+        if(PlayerPrefs.HasKey("playerCamera_fieldOfView")){
+            playerCamera.fieldOfView = PlayerPrefs.GetInt("playerCamera_fieldOfView");
+            int f = PlayerPrefs.GetInt("playerCamera_fieldOfView");
+            fieldOfViewSlider.value = f;
+            fieldOfViewDisplayText.text = f.ToString() + "°";
+        }
     }
 
     public void OnQualityLevelChanged(int newLevel){
@@ -64,6 +75,13 @@ public class GraphicsManager : MonoBehaviour
         else{
             SetResolution(resolutions[newResolution]);
         }
+    }
+
+    public void OnFieldOfViewChanged(float newFieldOfView){
+        playerCamera.fieldOfView = Mathf.RoundToInt(newFieldOfView);
+        fieldOfViewDisplayText.text = newFieldOfView.ToString() + "°";
+
+        PlayerPrefs.SetInt("playerCamera_fieldOfView", Mathf.RoundToInt(newFieldOfView));
     }
 
     void SetResolution(Resolution r){

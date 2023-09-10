@@ -8,11 +8,13 @@ public class PauseMenu : MonoBehaviour
 {
     public Toggle displayToggle;
     public Toggle controlsToggle;
+    public Toggle systemToggle;
     
 
     public GameObject pauseMenu;
     public GameObject displayMenu;
     public GameObject controlsMenu;
+    public GameObject systemMenu;
     public GameObject[] popupsThatMaintainPause;
     public UIPopup saveSettingsPopup;
 
@@ -23,12 +25,15 @@ public class PauseMenu : MonoBehaviour
     void Start(){
         displayToggle.onValueChanged.AddListener(delegate {ToggleMenu(displayMenu, displayToggle.isOn);});
         controlsToggle.onValueChanged.AddListener(delegate {ToggleMenu(controlsMenu, controlsToggle.isOn);});
+        systemToggle.onValueChanged.AddListener(delegate {ToggleMenu(systemMenu, systemToggle.isOn);});
 
         displayToggle.isOn = false;
         controlsToggle.isOn = false;
+        systemToggle.isOn = false;
 
         ToggleMenu(displayMenu, false);
         ToggleMenu(controlsMenu, false);
+        ToggleMenu(systemMenu, false);
 
         playerInput = FindObjectOfType<PlayerInput>();
         playerInput.actions["menu"].started += context => ChangePauseMenuState();
@@ -36,7 +41,8 @@ public class PauseMenu : MonoBehaviour
     }
 
     void ToggleMenu(GameObject m, bool state){
-        m.SetActive(state);
+        if(!settingsModified)
+            m.SetActive(state);
     }
 
     //Enables and disables the menu UI and corresponding action maps
@@ -56,7 +62,7 @@ public class PauseMenu : MonoBehaviour
         }
         else if(settingsModified){
             saveSettingsPopup.gameObject.SetActive(true);
-            settingsModified = false;
+            // settingsModified = false;
         }
         else if(dontUnpause && pauseMenu.activeSelf){
             saveSettingsPopup.gameObject.SetActive(false);
@@ -78,10 +84,16 @@ public class PauseMenu : MonoBehaviour
 
     public void FlagSettingsAsModified(){
         settingsModified = true;
+        displayToggle.interactable = false;
+        controlsToggle.interactable = false;
+        systemToggle.interactable = false;
     }
 
     public void FlagSettingsAsSaved(){
         settingsModified = false;
+        displayToggle.interactable = true;
+        controlsToggle.interactable = true;
+        systemToggle.interactable = true;
     }
 
 

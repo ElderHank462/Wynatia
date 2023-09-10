@@ -51,21 +51,21 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Melee Attack",
+                    "name": "Attack",
                     "type": "Button",
                     "id": "5a7c56ef-9026-405b-8409-14fb8fbb89e4",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Tap(duration=0.19)",
+                    "interactions": "Tap(duration=0.15)",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Melee Power Attack",
+                    "name": "Off-Hand Attack",
                     "type": "Button",
-                    "id": "575acf46-5c01-45c0-a040-22d3b9d6b085",
+                    "id": "4cd1c0e7-216e-476b-ac5b-3a5887f0b3b8",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "Hold(duration=0.2)",
+                    "interactions": "Tap(duration=0.15)",
                     "initialStateCheck": false
                 },
                 {
@@ -103,6 +103,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true
+                },
+                {
+                    "name": "Melee Power Attack",
+                    "type": "Button",
+                    "id": "575acf46-5c01-45c0-a040-22d3b9d6b085",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold(duration=0.25)",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Melee Off-Hand Power Attack",
+                    "type": "Button",
+                    "id": "779e840e-eb79-44dc-81d7-7744d1b36862",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold(duration=0.25)",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -212,18 +230,7 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "Mouse_Keyboard",
-                    "action": "Melee Attack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "6566e8eb-bcc0-4550-ab83-cd68b8ab9447",
-                    "path": "<Mouse>/leftButton",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "Mouse_Keyboard",
-                    "action": "Melee Power Attack",
+                    "action": "Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -268,6 +275,39 @@
                     "processors": "",
                     "groups": "Mouse_Keyboard",
                     "action": "look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6566e8eb-bcc0-4550-ab83-cd68b8ab9447",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Melee Power Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e5393fb3-d7a6-4c97-8d3f-d837ecb8293c",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Melee Off-Hand Power Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "aedb7062-3088-4bed-a1c5-0a3b300d9c59",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Off-Hand Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

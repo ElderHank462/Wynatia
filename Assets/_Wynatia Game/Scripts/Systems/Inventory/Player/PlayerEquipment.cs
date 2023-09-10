@@ -56,7 +56,25 @@ public class PlayerEquipment : MonoBehaviour
             Item w = weaponL;
             UnequipSlot(ref weaponL);
             EquipSlot(out weaponR, w);
+
+            foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
+                Destroy(child.gameObject);
+            }
+
+            foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
+                Destroy(child.gameObject);
+            }
+            
+            GameObject g = Instantiate(w.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
+            g.GetComponent<WorldItem>().instanceKinematic = true;
+            // Layer 2 is built-in and always equals "Ignore Raycast"
+            g.layer = 2;
+            foreach(Transform child in g.transform){
+                child.gameObject.layer = 2;
+            }
         }
+
+        
     }
 
     

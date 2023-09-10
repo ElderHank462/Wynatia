@@ -15,8 +15,10 @@ public class PlayerCombatControls : MonoBehaviour
         combatAgent = GetComponentInChildren<PlayerCombatAgent>();
 
         playerInput.actions["Sheathe Weapon"].performed += _ => SheatheUnsheathe();
-        playerInput.actions["Melee Attack"].performed += _ => MeleeAttack();
-        playerInput.actions["Melee Power Attack"].performed += _ => MeleePowerAttack();
+        playerInput.actions["Attack"].performed += _ => combatAgent.M_MainAttack();;
+        playerInput.actions["Off-Hand Attack"].performed += _ => combatAgent.M_OffAttack();
+        playerInput.actions["Melee Power Attack"].performed += _ => combatAgent.M_MainPowerAtack();
+        playerInput.actions["Melee Off-Hand Power Attack"].performed += _ => combatAgent.M_OffPowerAtack();
 
     }
 
@@ -25,10 +27,10 @@ public class PlayerCombatControls : MonoBehaviour
     }
 
     void MeleeAttack(){
-        combatAgent.M_Attack();
+        
     }
 
     void MeleePowerAttack(){
-        combatAgent.M_PowerAtack();
+        
     }
 }

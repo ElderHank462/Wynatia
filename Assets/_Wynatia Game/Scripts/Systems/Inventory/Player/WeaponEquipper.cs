@@ -21,6 +21,7 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
     private Item weaponToEquip;
     private PlayerInventory playerInventory;
     private PlayerEquipment playerEquipment;
+    private Transform meleeWeaponContainer;
 
     public enum Layout{
         Equip_MainBoth,
@@ -34,6 +35,7 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
     public void EquipItem(PlayerInventory.InventoryItem item){
         playerInventory = FindObjectOfType<PlayerInventory>();
         playerEquipment = FindObjectOfType<PlayerEquipment>();
+        meleeWeaponContainer = FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform;
 
         Layout popupLayout;
 
@@ -58,6 +60,7 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             if(!playerEquipment.weaponR && !playerEquipment.weaponL){
                 // Equip to main
                 playerEquipment.EquipSlot(out playerEquipment.weaponR, item.sObj);
+                AddWeaponToMainHandContainer(item.sObj);
                 ClosePopup();
                 return;
             }
@@ -105,9 +108,9 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         threeA.onClick.RemoveAllListeners();
         threeB.onClick.RemoveAllListeners();
 
-        threeA.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClosePopup();});
+        threeA.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
         threeB.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); 
-            playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); ClosePopup();});
+            playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
 
         string textA = "Main Hand";
         string textB = "One to Each Hand";
@@ -124,9 +127,9 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             threeB.onClick.RemoveAllListeners();
 
             threeA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClosePopup();});
+                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
             threeB.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponL); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); ClosePopup();});
+                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
                 
             string textA = "Main Hand (Replace)";
             string textB = "Off Hand (Replace)";
@@ -141,13 +144,14 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             fourC.onClick.RemoveAllListeners();
 
             fourA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClosePopup();});
+                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
             fourB.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponL); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); ClosePopup();});
+                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
             fourC.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
                 playerEquipment.UnequipSlot(ref playerEquipment.weaponL);  
                 playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip);
-                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); ClosePopup();});
+                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); 
+                ClosePopup();});
 
             string textA = "Main Hand (Replace)";
             string textB = "Off Hand (Replace)";
@@ -165,8 +169,8 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         threeB.onClick.RemoveAllListeners();
 
         threeA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponL); 
-            playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClosePopup();});
-        threeB.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); ClosePopup();});
+            playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+        threeB.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
 
         string textA = "Main Hand (Replace)";
         string textB = "Off Hand";
@@ -179,6 +183,38 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
     public void ClosePopup(){
         Destroy(gameObject);
     }
+
+
+    void AddWeaponToMainHandContainer(Item weaponItem){
+        if(weaponItem.meleeWeaponScriptableObject != null){
+            foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
+                Destroy(child.gameObject);
+            }
+            
+            GameObject g = Instantiate(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
+            g.GetComponent<WorldItem>().instanceKinematic = true;
+            // Layer 2 is built-in and always equals "Ignore Raycast"
+            g.layer = 2;
+            foreach(Transform child in g.transform){
+                child.gameObject.layer = 2;
+            }
+        }
+    }
+    void AddWeaponToOffHandContainer(Item weaponItem){
+        if(weaponItem.meleeWeaponScriptableObject != null){
+            foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
+                Destroy(child.gameObject);
+            }
+            
+            GameObject g = Instantiate(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform);
+            g.GetComponent<WorldItem>().instanceKinematic = true;
+            // Layer 2 is built-in and always equals "Ignore Raycast"
+            g.layer = 2;
+            foreach(Transform child in g.transform){
+                child.gameObject.layer = 2;
+            }
+        }
+    }
     
     #endregion
 
@@ -190,13 +226,16 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
 
         if(playerEquipment.weaponR == item.sObj && playerEquipment.weaponL != item.sObj){
             playerEquipment.UnequipSlot(ref playerEquipment.weaponR);
+            RemoveWeaponFromMainHandContainer();
             if(playerEquipment.weaponL){
+                // This function also manages combat instances of weapons
                 playerEquipment.OffToMainHand();
             }
 
         }
         else if(playerEquipment.weaponR != item.sObj && playerEquipment.weaponL == item.sObj){
             playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
+            RemoveWeaponFromOffHandContainer();
         }
         else{
             // This function only gets called if this weapon is equipped somewhere,
@@ -205,8 +244,21 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             
             // Unequip the weapon from both hands
             playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
+            RemoveWeaponFromOffHandContainer();
             playerEquipment.UnequipSlot(ref playerEquipment.weaponR);
+            RemoveWeaponFromMainHandContainer();
+        }
+    }
 
+    void RemoveWeaponFromMainHandContainer(){
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
+            Destroy(child.gameObject);
+        }
+    }
+
+    void RemoveWeaponFromOffHandContainer(){
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
+            Destroy(child.gameObject);
         }
     }
 
