@@ -19,6 +19,6 @@ MonoBehaviour:
   value: 0
   worldObject: {fileID: 1341231825037021448, guid: 2822744f4d431495c9d5236efe11aca0,
     type: 3}
-  twoHanded: 0
+  twoHanded: 1
   meleeWeaponScriptableObject: {fileID: 11400000, guid: e1e51107837ef4d48a73cf07e8097a40,
     type: 2}

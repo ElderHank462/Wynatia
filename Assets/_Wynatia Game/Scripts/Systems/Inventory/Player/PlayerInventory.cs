@@ -119,7 +119,7 @@ public class PlayerInventory : MonoBehaviour
         inventoryWindow.SetActive(!inventoryWindow.activeSelf);
 
         if(inventoryWindow.activeSelf){
-            Pause.PauseManagement.Pause();
+            Pause.PauseManagement.Pause(FindObjectOfType<PlayerInput>());
         }
         else{
             Pause.PauseManagement.Unpause();

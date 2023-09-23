@@ -10,6 +10,7 @@ public class WorldItem : MonoBehaviour
     public int quantity = 1;
     public Vector3 positionToSave = Vector3.zero;
     public bool instanceKinematic = false;
+    public List<Collider> modelColliders = new List<Collider>();
 
     
     void Start(){

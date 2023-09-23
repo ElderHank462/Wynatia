@@ -8,8 +8,11 @@ using TMPro;
 public class WeaponEquipper : MonoBehaviour, IEquipper
 {
     [SerializeField] private GameObject raycastBlocker;
+    [SerializeField] private GameObject twoOptionPanel;
     [SerializeField] private GameObject threeOptionPanel;
     [SerializeField] private GameObject fourOptionPanel;
+
+    [SerializeField] private Button twoA;
 
     [SerializeField] private Button threeA;
     [SerializeField] private Button threeB;
@@ -21,30 +24,33 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
     private Item weaponToEquip;
     private PlayerInventory playerInventory;
     private PlayerEquipment playerEquipment;
-    private Transform meleeWeaponContainer;
+    private PlayerCombatAgent playerCombatAgent;
 
     public enum Layout{
         Equip_MainBoth,
         Equip_MainOff,
         Equip_Off__Replace_Main,
         Replace_MainOffBoth,
-        Replace_MainOff
+        Replace_MainOff,
+        Replace_Main
     }
 
     #region Equipping
     public void EquipItem(PlayerInventory.InventoryItem item){
         playerInventory = FindObjectOfType<PlayerInventory>();
         playerEquipment = FindObjectOfType<PlayerEquipment>();
-        meleeWeaponContainer = FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform;
+        playerCombatAgent = FindObjectOfType<PlayerCombatAgent>();
 
         Layout popupLayout;
 
         if(item.count > 1 && !item.sObj.twoHanded){
+            
             if(!playerEquipment.weaponR && !playerEquipment.weaponL){
                 // Equip to main, off, both, or cancel?
                 popupLayout = Layout.Equip_MainBoth;
             }
-            else if(playerEquipment.weaponR && !playerEquipment.weaponL){
+            else if(playerEquipment.weaponR && !playerEquipment.weaponL && !playerEquipment.weaponR.twoHanded){
+                
                 // Equip to off, replace main, or cancel?
                 popupLayout = Layout.Equip_Off__Replace_Main;
             }
@@ -65,8 +71,14 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
                 return;
             }
             else if(playerEquipment.weaponR && !playerEquipment.weaponL){
-                // Equip to off, replace main, or cancel?
-                popupLayout = Layout.Equip_Off__Replace_Main;
+                if(!playerEquipment.weaponR.twoHanded){
+                    // Equip to off, replace main, or cancel?
+                    popupLayout = Layout.Equip_Off__Replace_Main;
+                }
+                else{
+                    // Replace main or cancel?
+                    popupLayout = Layout.Replace_Main;
+                }
             }
             else{
                 // It isn't possible to have a weapon in the off hand but not in the main hand,
@@ -101,7 +113,21 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             
             case Layout.Equip_Off__Replace_Main: SetupEquipOffReplaceMain();
             break;
+
+            case Layout.Replace_Main: SetupReplaceMain();
+            break;
         }
+    }
+
+    void SetupReplaceMain(){
+        twoA.onClick.RemoveAllListeners();
+
+        twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
+                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+
+        twoA.GetComponentInChildren<TextMeshProUGUI>().SetText("Yes");
+
+        twoOptionPanel.SetActive(true);
     }
 
     void SetupEquipMB(){
@@ -168,7 +194,7 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         threeA.onClick.RemoveAllListeners();
         threeB.onClick.RemoveAllListeners();
 
-        threeA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponL); 
+        threeA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
             playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
         threeB.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
 
@@ -187,32 +213,43 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
 
     void AddWeaponToMainHandContainer(Item weaponItem){
         if(weaponItem.meleeWeaponScriptableObject != null){
-            foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
-                Destroy(child.gameObject);
-            }
+            playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
+            // foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
+            //     Destroy(child.gameObject);
+            // }
             
-            GameObject g = Instantiate(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
-            g.GetComponent<WorldItem>().instanceKinematic = true;
-            // Layer 2 is built-in and always equals "Ignore Raycast"
-            g.layer = 2;
-            foreach(Transform child in g.transform){
-                child.gameObject.layer = 2;
-            }
+            // GameObject g = Instantiate(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
+            // g.GetComponent<WorldItem>().instanceKinematic = true;
+            // // Layer 2 is built-in and always equals "Ignore Raycast"
+            // g.layer = 2;
+            // foreach(Transform child in g.transform){
+            //     child.gameObject.layer = 2;
+            //     // If the collider on this transform is for rigidbody physics, disable it
+            //     if(g.GetComponent<WorldItem>().modelColliders.Contains(child.GetComponent<Collider>())){
+            //         child.GetComponent<Collider>().enabled = false;
+            //     }
+            // }
         }
     }
     void AddWeaponToOffHandContainer(Item weaponItem){
         if(weaponItem.meleeWeaponScriptableObject != null){
-            foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
-                Destroy(child.gameObject);
-            }
+            playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform);
             
-            GameObject g = Instantiate(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform);
-            g.GetComponent<WorldItem>().instanceKinematic = true;
-            // Layer 2 is built-in and always equals "Ignore Raycast"
-            g.layer = 2;
-            foreach(Transform child in g.transform){
-                child.gameObject.layer = 2;
-            }
+            // foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
+            //     Destroy(child.gameObject);
+            // }
+            
+            // GameObject g = Instantiate(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform);
+            // g.GetComponent<WorldItem>().instanceKinematic = true;
+            // // Layer 2 is built-in and always equals "Ignore Raycast"
+            // g.layer = 2;
+            // foreach(Transform child in g.transform){
+            //     child.gameObject.layer = 2;
+            //     // If the collider on this transform is for rigidbody physics, disable it
+            //     if(g.GetComponent<WorldItem>().modelColliders.Contains(child.GetComponent<Collider>())){
+            //         child.GetComponent<Collider>().enabled = false;
+            //     }
+            // }
         }
     }
     

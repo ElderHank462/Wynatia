@@ -423,6 +423,10 @@ MonoBehaviour:
   quantity: 1
   positionToSave: {x: 0, y: 0, z: 0}
   instanceKinematic: 0
+  modelColliders:
+  - {fileID: 4164729976326001138}
+  - {fileID: 4164729977663543318}
+  - {fileID: 4164729977785813420}
 --- !u!135 &-8520488883575604809
 SphereCollider:
   m_ObjectHideFlags: 0

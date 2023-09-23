@@ -56,7 +56,7 @@ public class PauseMenu : MonoBehaviour
         }
 
         if(!Pause.PauseManagement.paused){
-            Pause.PauseManagement.Pause();
+            Pause.PauseManagement.Pause(playerInput);
             playerInput.SwitchCurrentActionMap("menu");
             pauseMenu.SetActive(true);
         }

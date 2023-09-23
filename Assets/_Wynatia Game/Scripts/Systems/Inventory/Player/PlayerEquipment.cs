@@ -24,7 +24,11 @@ public class PlayerEquipment : MonoBehaviour
 
     public Item armor;
 
+
+    private PlayerCombatAgent playerCombatAgent;
+
     void Start(){
+        playerCombatAgent = FindObjectOfType<PlayerCombatAgent>();
         LoadEquipment();
     }
 
@@ -40,6 +44,18 @@ public class PlayerEquipment : MonoBehaviour
     void LoadEquipment(){
         if(ES3.KeyExists("Player_Equipment")){
             ES3.LoadInto("Player_Equipment", this);
+
+            playerCombatAgent.mainHandContainer = playerCombatAgent.transform.Find("mainHandContainer").gameObject;
+            playerCombatAgent.offHandContainer = playerCombatAgent.transform.Find("offHandContainer").gameObject;
+            playerCombatAgent.rangedContainer = playerCombatAgent.transform.Find("rangedContainer").gameObject;
+
+            if(weaponR){
+                InstantiateWeapon(weaponR.worldObject, playerCombatAgent.mainHandContainer.transform);
+            }
+            if(weaponL){
+                InstantiateWeapon(weaponL.worldObject, playerCombatAgent.offHandContainer.transform);
+            }
+            playerCombatAgent.Setup(this);
         }
     }
 
@@ -57,26 +73,47 @@ public class PlayerEquipment : MonoBehaviour
             UnequipSlot(ref weaponL);
             EquipSlot(out weaponR, w);
 
-            foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
+            foreach(Transform child in playerCombatAgent.offHandContainer.transform){
                 Destroy(child.gameObject);
             }
 
-            foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
-                Destroy(child.gameObject);
-            }
-            
-            GameObject g = Instantiate(w.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
-            g.GetComponent<WorldItem>().instanceKinematic = true;
-            // Layer 2 is built-in and always equals "Ignore Raycast"
-            g.layer = 2;
-            foreach(Transform child in g.transform){
-                child.gameObject.layer = 2;
-            }
+            // foreach(Transform child in playerCombatAgent.mainHandContainer.transform){
+            //     Destroy(child.gameObject);
+            // }
+
+            InstantiateWeapon(w.worldObject, playerCombatAgent.mainHandContainer.transform);
+            playerCombatAgent.UpdateWeaponInstances(this);
+            // GameObject g = Instantiate(w.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
+            // g.GetComponent<WorldItem>().instanceKinematic = true;
+            // // Layer 2 is built-in and always equals "Ignore Raycast"
+            // g.layer = 2;
+            // foreach(Transform child in g.transform){
+            //     child.gameObject.layer = 2;
+            // }
         }
 
         
     }
 
+    public void InstantiateWeapon(GameObject weaponGameObject, Transform parentContainer){
+        foreach(Transform child in parentContainer){
+            Destroy(child.gameObject);
+        }
+        
+        GameObject g = Instantiate(weaponGameObject, parentContainer);
+        g.GetComponent<WorldItem>().instanceKinematic = true;
+        // Layer 2 is built-in and always equals "Ignore Raycast"
+        g.layer = 2;
+        foreach(Transform child in g.transform){
+            child.gameObject.layer = 2;
+            // If the collider on this transform is for rigidbody physics, disable it
+            if(g.GetComponent<WorldItem>().modelColliders.Contains(child.GetComponent<Collider>())){
+                child.GetComponent<Collider>().enabled = false;
+            }
+        }
+
+        playerCombatAgent.UpdateWeaponInstances(this);
+    }
     
 
     public void UnequipSlot(ref Item slot){

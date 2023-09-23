@@ -15,8 +15,13 @@ public class DamageableObject : MonoBehaviour, IDamageable
 
     public void Damage(int dmg, Vector3 hitPosition){
         currentHealth -= dmg;
-        floatingHealthBar.SetHealth(currentHealth, maxHealth);
-        Instantiate(hitEffect, hitPosition, Quaternion.Euler(-transform.eulerAngles));
+        if(floatingHealthBar){
+            floatingHealthBar.SetHealth(currentHealth, maxHealth);
+        }
+        if(hitEffect){
+            Instantiate(hitEffect, hitPosition, Quaternion.Euler(-transform.eulerAngles));
+        }
+        
         if(currentHealth <= 0){
             Destroy(gameObject);
         }
