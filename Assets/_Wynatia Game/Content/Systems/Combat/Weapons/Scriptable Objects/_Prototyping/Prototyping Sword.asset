@@ -13,7 +13,10 @@ MonoBehaviour:
   m_Name: Prototyping Sword
   m_EditorClassIdentifier: 
   weaponName: Prototyping Sword
-  damage: 5
-  cooldownTime: 0.5
+  baseDamage: 5
+  weight: 4
+  sharpness: 10
+  cooldownTime: 1
   powerAttackDamageMultiplier: 2
   powerAttackCooldownMultiplier: 2
+  traits: 

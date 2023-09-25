@@ -32,7 +32,8 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         Equip_Off__Replace_Main,
         Replace_MainOffBoth,
         Replace_MainOff,
-        Replace_Main
+        Replace_Main,
+        Replace_Main__Unequip_Off
     }
 
     #region Equipping
@@ -43,16 +44,21 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
 
         Layout popupLayout;
 
+        // Two-handed applies to both two-handed melee weapons and ranged weapons
         if(item.count > 1 && !item.sObj.twoHanded){
-            
             if(!playerEquipment.weaponR && !playerEquipment.weaponL){
                 // Equip to main, off, both, or cancel?
                 popupLayout = Layout.Equip_MainBoth;
             }
-            else if(playerEquipment.weaponR && !playerEquipment.weaponL && !playerEquipment.weaponR.twoHanded){
-                
-                // Equip to off, replace main, or cancel?
-                popupLayout = Layout.Equip_Off__Replace_Main;
+            else if(playerEquipment.weaponR && !playerEquipment.weaponL){
+                if(playerEquipment.weaponR.twoHanded){
+                    // Replace main or cancel?
+                    popupLayout = Layout.Replace_Main;
+                }
+                else{
+                    // Equip to off, replace main, or cancel?
+                    popupLayout = Layout.Equip_Off__Replace_Main;
+                }
             }
             else{
                 // It isn't possible to have a weapon in the off hand but not in the main hand,
@@ -66,12 +72,15 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             if(!playerEquipment.weaponR && !playerEquipment.weaponL){
                 // Equip to main
                 playerEquipment.EquipSlot(out playerEquipment.weaponR, item.sObj);
-                AddWeaponToMainHandContainer(item.sObj);
+                if(item.sObj.meleeWeaponScriptableObject)
+                    AddWeaponToMainHandContainer(item.sObj);
+                else if(item.sObj.rangedWeaponScriptableObject)
+                    AddWeaponToRangedContainer(item.sObj);
                 ClosePopup();
                 return;
             }
             else if(playerEquipment.weaponR && !playerEquipment.weaponL){
-                if(!playerEquipment.weaponR.twoHanded){
+                if(!playerEquipment.weaponR.twoHanded && !item.sObj.twoHanded){
                     // Equip to off, replace main, or cancel?
                     popupLayout = Layout.Equip_Off__Replace_Main;
                 }
@@ -83,9 +92,14 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             else{
                 // It isn't possible to have a weapon in the off hand but not in the main hand,
                 // so this branch can only be run if there are weapons in both hands
-
-                // Replace main, off, or cancel?
-                popupLayout = Layout.Replace_MainOff;
+                if(!item.sObj.twoHanded){
+                    // Replace main, off, or cancel?
+                    popupLayout = Layout.Replace_MainOff;
+                }
+                else{
+                    // Replace both hands with one two-handed weapon or cancel?
+                    popupLayout = Layout.Replace_Main__Unequip_Off;
+                }
             }
         }
         raycastBlocker.SetActive(true);
@@ -116,16 +130,46 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
 
             case Layout.Replace_Main: SetupReplaceMain();
             break;
+
+            case Layout.Replace_Main__Unequip_Off: SetupReplaceMainUnequipOff();
+            break;
         }
+    }
+
+    void SetupReplaceMainUnequipOff(){
+        twoA.onClick.RemoveAllListeners();
+
+        if(weaponToEquip.meleeWeaponScriptableObject){
+            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
+                    playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); RemoveWeaponFromOffHandContainer(); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+        }
+        else if(weaponToEquip.rangedWeaponScriptableObject){
+            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
+                    playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToRangedContainer(weaponToEquip); ClosePopup();});
+        }
+
+        twoA.GetComponentInChildren<TextMeshProUGUI>().SetText("Yes");
+
+        twoOptionPanel.GetComponentInChildren<TextMeshProUGUI>().SetText("Are you sure you want to equip this weapon? Doing so will also unequip your off-hand weapon.");
+
+        twoOptionPanel.SetActive(true);
     }
 
     void SetupReplaceMain(){
         twoA.onClick.RemoveAllListeners();
 
-        twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+        if(weaponToEquip.meleeWeaponScriptableObject){
+            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
+                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+        }
+        else if(weaponToEquip.rangedWeaponScriptableObject){
+            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
+                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToRangedContainer(weaponToEquip); ClosePopup();});
+        }
 
         twoA.GetComponentInChildren<TextMeshProUGUI>().SetText("Yes");
+
+        twoOptionPanel.GetComponentInChildren<TextMeshProUGUI>().SetText("Are you sure you want to replace your current weapon?");
 
         twoOptionPanel.SetActive(true);
     }
@@ -207,49 +251,31 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
     }
 
     public void ClosePopup(){
+        if(playerEquipment.ammunition){
+            if(!playerEquipment.weaponR || !playerEquipment.weaponR.rangedWeaponScriptableObject
+                    || playerEquipment.weaponR.rangedWeaponScriptableObject.ammunitionType != playerEquipment.ammunition.ammunitionScriptableObject.type){
+                playerEquipment.UnequipSlot(ref playerEquipment.ammunition);
+            }
+        }
+        
         Destroy(gameObject);
     }
 
+    void AddWeaponToRangedContainer(Item weaponItem){
+        if(weaponItem.rangedWeaponScriptableObject != null){
+            playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().rangedContainer.transform);
+        }
+    }
 
     void AddWeaponToMainHandContainer(Item weaponItem){
         if(weaponItem.meleeWeaponScriptableObject != null){
             playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
-            // foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
-            //     Destroy(child.gameObject);
-            // }
-            
-            // GameObject g = Instantiate(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
-            // g.GetComponent<WorldItem>().instanceKinematic = true;
-            // // Layer 2 is built-in and always equals "Ignore Raycast"
-            // g.layer = 2;
-            // foreach(Transform child in g.transform){
-            //     child.gameObject.layer = 2;
-            //     // If the collider on this transform is for rigidbody physics, disable it
-            //     if(g.GetComponent<WorldItem>().modelColliders.Contains(child.GetComponent<Collider>())){
-            //         child.GetComponent<Collider>().enabled = false;
-            //     }
-            // }
+
         }
     }
     void AddWeaponToOffHandContainer(Item weaponItem){
         if(weaponItem.meleeWeaponScriptableObject != null){
             playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform);
-            
-            // foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
-            //     Destroy(child.gameObject);
-            // }
-            
-            // GameObject g = Instantiate(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform);
-            // g.GetComponent<WorldItem>().instanceKinematic = true;
-            // // Layer 2 is built-in and always equals "Ignore Raycast"
-            // g.layer = 2;
-            // foreach(Transform child in g.transform){
-            //     child.gameObject.layer = 2;
-            //     // If the collider on this transform is for rigidbody physics, disable it
-            //     if(g.GetComponent<WorldItem>().modelColliders.Contains(child.GetComponent<Collider>())){
-            //         child.GetComponent<Collider>().enabled = false;
-            //     }
-            // }
         }
     }
     
@@ -261,15 +287,22 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         playerInventory = FindObjectOfType<PlayerInventory>();
         playerEquipment = FindObjectOfType<PlayerEquipment>();
 
+        // Unequip main hand
         if(playerEquipment.weaponR == item.sObj && playerEquipment.weaponL != item.sObj){
+            if(playerEquipment.weaponR.meleeWeaponScriptableObject)
+                RemoveWeaponFromMainHandContainer();
+            else
+                RemoveWeaponFromRangedContainer();
+
             playerEquipment.UnequipSlot(ref playerEquipment.weaponR);
-            RemoveWeaponFromMainHandContainer();
+
             if(playerEquipment.weaponL){
                 // This function also manages combat instances of weapons
                 playerEquipment.OffToMainHand();
             }
 
         }
+        // Unequip off hand
         else if(playerEquipment.weaponR != item.sObj && playerEquipment.weaponL == item.sObj){
             playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
             RemoveWeaponFromOffHandContainer();
@@ -284,6 +317,25 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             RemoveWeaponFromOffHandContainer();
             playerEquipment.UnequipSlot(ref playerEquipment.weaponR);
             RemoveWeaponFromMainHandContainer();
+        }
+    }
+
+    void ClearAllWeaponContainers(){
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
+            Destroy(child.gameObject);
+        }
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
+            Destroy(child.gameObject);
+        }
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().rangedContainer.transform){
+            Destroy(child.gameObject);
+        }
+    }
+
+    void RemoveWeaponFromRangedContainer(){
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().rangedContainer.transform){
+            if(child.gameObject.name != "ammunitionContainer")
+                Destroy(child.gameObject);
         }
     }
 

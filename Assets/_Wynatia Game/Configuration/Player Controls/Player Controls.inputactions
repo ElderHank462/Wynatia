@@ -121,6 +121,15 @@
                     "processors": "",
                     "interactions": "Hold(duration=0.25)",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Ranged Attack",
+                    "type": "Button",
+                    "id": "74db796e-5f6d-46d3-8475-004b2fcb4889",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -308,6 +317,17 @@
                     "processors": "",
                     "groups": "Mouse_Keyboard",
                     "action": "Off-Hand Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "5beb109d-8504-4d21-af2d-3fb9056ec28c",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Ranged Attack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

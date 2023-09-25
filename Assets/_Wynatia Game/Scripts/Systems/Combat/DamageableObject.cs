@@ -11,6 +11,7 @@ public class DamageableObject : MonoBehaviour, IDamageable
 
     void Start(){
         currentHealth = maxHealth;
+        floatingHealthBar.SetHealth(currentHealth, maxHealth);
     }
 
     public void Damage(int dmg, Vector3 hitPosition){

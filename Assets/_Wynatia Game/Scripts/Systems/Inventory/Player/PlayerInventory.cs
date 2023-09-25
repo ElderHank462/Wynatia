@@ -126,6 +126,9 @@ public class PlayerInventory : MonoBehaviour
             SaveInventory();
             StartCoroutine(InstantiateWorldItems(dropPoint));
         }
+
+        FindObjectOfType<PlayerCombatAgent>().UpdateCombatAgentVariables();
+        FindObjectOfType<PlayerCombatAgent>().UpdateAnimators();
     }
 
 

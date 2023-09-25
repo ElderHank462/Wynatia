@@ -95,7 +95,7 @@ public class ControlsManager : MonoBehaviour
         var rebind = actionToRebind.PerformInteractiveRebinding()
             .WithCancelingThrough("<Keyboard>/escape")
             .OnCancel(operation => { rebinder.UpdateText(); rebindPopup.SetActive(false); settingsModified = false; operation.Dispose();})
-            .OnComplete(operation => { CheckForConflicts(); if(actionToRebind.name == "Attack"){ UpdatePowerAttackBinding();};rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();});
+            .OnComplete(operation => { CheckForConflicts(); if(actionToRebind.name == "Attack"){ UpdateAllAttackBindings();};rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();});
 
         rebind.Start();
 
@@ -122,11 +122,15 @@ public class ControlsManager : MonoBehaviour
             SetupSavePopup(settingsModified);
         }
 
-        void UpdatePowerAttackBinding(){
+        void UpdateAllAttackBindings(){
             playerInputComponent.actions["Melee Power Attack"].ApplyBindingOverride(0, actionToRebind.bindings[0].effectivePath);
+            playerInputComponent.actions["Ranged Attack"].ApplyBindingOverride(0, actionToRebind.bindings[0].effectivePath);
             foreach(Transform rebinderGameObject in rebinderContainer){
                 Rebinder r = rebinderGameObject.GetComponent<Rebinder>();
                 if(r.action.name == "Melee Power Attack"){
+                    r.UpdateText();
+                }
+                if(r.action.name == "Ranged Attack"){
                     r.UpdateText();
                 }
             }

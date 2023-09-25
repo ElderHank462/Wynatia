@@ -65,8 +65,4 @@ public class WorldItem : MonoBehaviour
         Destroy(gameObject);
     }
 
-    void OnDrawGizmosSelected(){
-        Gizmos.color = Color.red;
-        Gizmos.DrawSphere(positionToSave, 0.2f);
-    }
 }

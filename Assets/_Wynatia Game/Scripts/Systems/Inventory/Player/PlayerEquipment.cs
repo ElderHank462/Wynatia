@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerEquipment : MonoBehaviour
 {
@@ -17,6 +18,7 @@ public class PlayerEquipment : MonoBehaviour
     public Item ringR1, ringR2, ringR3, ringR4, ringR5;
 
     public Item weaponL, weaponR;
+    public Item ammunition;
 
     public Item shield;
 
@@ -50,12 +52,15 @@ public class PlayerEquipment : MonoBehaviour
             playerCombatAgent.rangedContainer = playerCombatAgent.transform.Find("rangedContainer").gameObject;
 
             if(weaponR){
-                InstantiateWeapon(weaponR.worldObject, playerCombatAgent.mainHandContainer.transform);
+                if(weaponR.meleeWeaponScriptableObject)
+                    InstantiateWeapon(weaponR.worldObject, playerCombatAgent.mainHandContainer.transform);
+                else
+                    InstantiateWeapon(weaponR.worldObject, playerCombatAgent.rangedContainer.transform);
             }
             if(weaponL){
                 InstantiateWeapon(weaponL.worldObject, playerCombatAgent.offHandContainer.transform);
             }
-            playerCombatAgent.Setup(this);
+            playerCombatAgent.Setup();
         }
     }
 
@@ -77,19 +82,9 @@ public class PlayerEquipment : MonoBehaviour
                 Destroy(child.gameObject);
             }
 
-            // foreach(Transform child in playerCombatAgent.mainHandContainer.transform){
-            //     Destroy(child.gameObject);
-            // }
-
             InstantiateWeapon(w.worldObject, playerCombatAgent.mainHandContainer.transform);
-            playerCombatAgent.UpdateWeaponInstances(this);
-            // GameObject g = Instantiate(w.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
-            // g.GetComponent<WorldItem>().instanceKinematic = true;
-            // // Layer 2 is built-in and always equals "Ignore Raycast"
-            // g.layer = 2;
-            // foreach(Transform child in g.transform){
-            //     child.gameObject.layer = 2;
-            // }
+            playerCombatAgent.UpdateCombatAgentVariables();
+
         }
 
         
@@ -97,7 +92,9 @@ public class PlayerEquipment : MonoBehaviour
 
     public void InstantiateWeapon(GameObject weaponGameObject, Transform parentContainer){
         foreach(Transform child in parentContainer){
-            Destroy(child.gameObject);
+            if(child.gameObject.name != "ammunitionContainer"){
+                Destroy(child.gameObject);
+            }
         }
         
         GameObject g = Instantiate(weaponGameObject, parentContainer);
@@ -112,7 +109,12 @@ public class PlayerEquipment : MonoBehaviour
             }
         }
 
-        playerCombatAgent.UpdateWeaponInstances(this);
+        playerCombatAgent.UpdateCombatAgentVariables();
+
+        if(g.GetComponent<WorldItem>().scriptableObject.rangedWeaponScriptableObject){
+            float drawTime = g.GetComponent<WorldItem>().scriptableObject.rangedWeaponScriptableObject.drawTime;
+            FindObjectOfType<PlayerInput>().actions["Ranged Attack"].ApplyBindingOverride(new InputBinding{ overrideInteractions = "slowTap(duration=" + drawTime + ")"});
+        }
     }
     
 

@@ -134,6 +134,40 @@ public class ItemActionsMenu : MonoBehaviour
                     // itemActionAButton.onClick.AddListener(delegate {playerEquipment.UnequipWeaponCheck(item);});
                 }
                 break;
+            // Ammunition
+            case Item.ItemType.Arrows:
+
+                if(!playerInventory.SelectedItemEquipped()){
+                    SetButtonTexts("Equip");
+                    itemActionAButton.onClick.AddListener(delegate { playerEquipment.UnequipSlot(ref playerEquipment.ammunition);
+                        playerEquipment.EquipSlot(out playerEquipment.ammunition, item.sObj); Setup(item);});
+                }
+                else{
+                    SetButtonTexts("Unequip");
+                    itemActionAButton.onClick.AddListener(delegate { playerEquipment.UnequipSlot(ref playerEquipment.ammunition); Setup(item);});
+                    dropItemButton.interactable = false;
+                }
+            break;
+
+            case Item.ItemType.Bolts:
+                SetButtonStates(false);
+                // Auto equip if ammunition isn't already equipped
+                if(playerEquipment.weaponR && playerEquipment.weaponR.rangedWeaponScriptableObject){
+                    if(playerEquipment.weaponR.rangedWeaponScriptableObject.ammunitionType == Ammunition.Type.Bolts && !playerEquipment.ammunition){
+                        playerEquipment.EquipSlot(out playerEquipment.ammunition, item.sObj);
+                    }
+                }
+            break;
+
+            case Item.ItemType.Projectile:
+                SetButtonStates(false);
+                // Auto equip if ammunition isn't already equipped
+                if(playerEquipment.weaponR && playerEquipment.weaponR.rangedWeaponScriptableObject){
+                    if(playerEquipment.weaponR.rangedWeaponScriptableObject.ammunitionType == Ammunition.Type.Projectile && !playerEquipment.ammunition){
+                        playerEquipment.EquipSlot(out playerEquipment.ammunition, item.sObj);
+                    }
+                }
+            break;
 
             // The items below are all SINGLE SLOT items
             // Shield
