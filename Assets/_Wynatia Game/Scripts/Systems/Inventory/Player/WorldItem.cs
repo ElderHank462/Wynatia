@@ -16,11 +16,14 @@ public class WorldItem : MonoBehaviour
     void Start(){
         positionToSave = transform.position;
         StartCoroutine(InitializeRigidbody());
+        // Debug.Log("spawned: " + gameObject.name);
     }
 
     IEnumerator InitializeRigidbody(){
-        GetComponent<Rigidbody>().velocity = Vector3.zero;
-        GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        if(!GetComponent<Rigidbody>().isKinematic){
+            GetComponent<Rigidbody>().velocity = Vector3.zero;
+            GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+        }
         GetComponent<Rigidbody>().isKinematic = true;
         yield return new WaitForEndOfFrame();
         GetComponent<Rigidbody>().isKinematic = instanceKinematic;
@@ -58,11 +61,68 @@ public class WorldItem : MonoBehaviour
         if(positionToSave == Vector3.up * -100){
             positionToSave = transform.position;
         }
+        // Debug.Log(gameObject.name + " position to be saved: " + positionToSave);
     }
 
     public void AddToInventory(PlayerInventory inventory){
         inventory.AddItem(new PlayerInventory.InventoryItem(scriptableObject, scriptableObject.worldObject, quantity));
+
+        WorldItemManager manager = FindObjectOfType<WorldItemManager>();
+
+        if(manager.worldItems.Contains(gameObject))
+            manager.worldItems.Remove(gameObject);
+
         Destroy(gameObject);
+    }
+
+    public void DisablePickup(bool kinematic = true){
+        GetComponent<Rigidbody>().isKinematic = kinematic;
+        instanceKinematic = kinematic;
+
+        // Layer 2 is built-in and always equals "Ignore Raycast"
+        gameObject.layer = 2;
+
+        foreach(Transform child in transform){
+            child.gameObject.layer = 2;
+        }
+    }
+
+    public void EnablePickup(bool kinematic = false){
+        GetComponent<Rigidbody>().isKinematic = kinematic;
+        instanceKinematic = kinematic;
+
+        // Layer 3 is user defined and equals "Inventory Item"
+        gameObject.layer = 3;
+        
+        foreach(Transform child in transform){
+            child.gameObject.layer = 3;
+        }
+    }
+
+    public void DisablePhysicsColliders(){
+        StartCoroutine(WaitThenDisableColliders());
+    }
+
+    IEnumerator WaitThenDisableColliders(){
+        yield return new WaitForSeconds(Time.fixedDeltaTime);
+
+        foreach(Collider col in modelColliders){
+            // If the collider on this transform is for rigidbody physics, enable it
+                col.enabled = false;
+        }
+    }
+
+    public void EnablePhysicsColliders(){
+        // foreach(Transform child in transform){
+        //     // If the collider on this transform is for rigidbody physics, enable it
+        //     if(modelColliders.Contains(child.GetComponent<Collider>())){
+        //         child.GetComponent<Collider>().enabled = true;
+        //     }
+        // }
+
+        foreach(Collider col in modelColliders){
+            col.enabled = true;
+        }
     }
 
 }

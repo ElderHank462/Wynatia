@@ -328,7 +328,8 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             Destroy(child.gameObject);
         }
         foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().rangedContainer.transform){
-            Destroy(child.gameObject);
+            if(child.gameObject.name != "ammunitionContainer")
+                Destroy(child.gameObject);
         }
     }
 

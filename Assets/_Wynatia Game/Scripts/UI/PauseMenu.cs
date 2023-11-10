@@ -38,6 +38,8 @@ public class PauseMenu : MonoBehaviour
         playerInput = FindObjectOfType<PlayerInput>();
         playerInput.actions["menu"].started += context => ChangePauseMenuState();
         playerInput.actions["close"].started += context => ChangePauseMenuState();
+
+        FindObjectOfType<ControlsManager>().Initialize();
     }
 
     void ToggleMenu(GameObject m, bool state){
@@ -78,6 +80,8 @@ public class PauseMenu : MonoBehaviour
     public void Unpause(){
         Pause.PauseManagement.Unpause();
         playerInput.SwitchCurrentActionMap("player_controls");
+        FindObjectOfType<PlayerCombatAgent>().RepairCombatAgentAfterMenuClose();
+    
         saveSettingsPopup.gameObject.SetActive(false);
         pauseMenu.SetActive(false);
     }

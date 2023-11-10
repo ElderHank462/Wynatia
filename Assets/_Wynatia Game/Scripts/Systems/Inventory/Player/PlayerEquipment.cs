@@ -96,24 +96,26 @@ public class PlayerEquipment : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
+
         
         GameObject g = Instantiate(weaponGameObject, parentContainer);
-        g.GetComponent<WorldItem>().instanceKinematic = true;
-        // Layer 2 is built-in and always equals "Ignore Raycast"
-        g.layer = 2;
-        foreach(Transform child in g.transform){
-            child.gameObject.layer = 2;
-            // If the collider on this transform is for rigidbody physics, disable it
-            if(g.GetComponent<WorldItem>().modelColliders.Contains(child.GetComponent<Collider>())){
-                child.GetComponent<Collider>().enabled = false;
-            }
-        }
+        g.GetComponent<WorldItem>().DisablePickup();
+        g.GetComponent<WorldItem>().DisablePhysicsColliders();
 
         playerCombatAgent.UpdateCombatAgentVariables();
 
         if(g.GetComponent<WorldItem>().scriptableObject.rangedWeaponScriptableObject){
             float drawTime = g.GetComponent<WorldItem>().scriptableObject.rangedWeaponScriptableObject.drawTime;
-            FindObjectOfType<PlayerInput>().actions["Ranged Attack"].ApplyBindingOverride(new InputBinding{ overrideInteractions = "slowTap(duration=" + drawTime + ")"});
+            Debug.Log("interaction hold time: " + drawTime);
+            InputAction rangedAttackAction = FindObjectOfType<PlayerInput>().actions["Ranged Attack"];
+
+// ******* IF RANGED WEAPON INPUT DOESN'T MATCH WHAT CONTROL MANAGER HAS, LOOK HERE
+// ******* THIS IS WHERE I ATTEMPTED TO FIX THAT BUG
+            rangedAttackAction.ApplyBindingOverride(new InputBinding{ overrideInteractions = "slowTap(duration=" + drawTime + ")", 
+                overridePath = rangedAttackAction.bindings[0].effectivePath});
+
+
+                Debug.Log(rangedAttackAction.bindings[0].effectivePath + "; interactions: " + rangedAttackAction.bindings[0].effectiveInteractions);
         }
     }
     

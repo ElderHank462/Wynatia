@@ -128,7 +128,7 @@ public class PlayerInventory : MonoBehaviour
         }
 
         FindObjectOfType<PlayerCombatAgent>().UpdateCombatAgentVariables();
-        FindObjectOfType<PlayerCombatAgent>().UpdateAnimators();
+        FindObjectOfType<PlayerCombatAgent>().RepairCombatAgentAfterMenuClose();
     }
 
 
@@ -222,7 +222,8 @@ public class PlayerInventory : MonoBehaviour
         if(!unequipAll){
             // Remove the item from the equipped items so that when SetupItemUIButtons runs,
             // it toggles the item to be unequipped
-            equippedItems.Remove(selectedItem.sObj);
+            if(equippedItems.Contains(selectedItem.sObj))
+                equippedItems.Remove(selectedItem.sObj);
         }
         else{
             // Loop backwards so the indexes of the items we are trying to remove don't change
@@ -334,7 +335,15 @@ public class PlayerInventory : MonoBehaviour
             Transform itemContainer = GameObject.FindWithTag("Item Container").transform;
             
             foreach (var item in worldItemsToInstantiate){
-                Instantiate(item, positionToInstantiate, Quaternion.identity, itemContainer);
+                GameObject g = Instantiate(item, positionToInstantiate, Quaternion.identity, itemContainer);
+                g.GetComponent<WorldItem>().EnablePhysicsColliders();
+                g.GetComponent<WorldItem>().EnablePickup();
+
+                if(g.GetComponent<Projectile>()){
+                    g.GetComponent<Projectile>().enabled = false;
+                    Debug.Log("projectile script disabled");
+                }
+
                 yield return new WaitForSeconds(dropItemInterval);
             }
 
@@ -405,6 +414,39 @@ public class PlayerInventory : MonoBehaviour
         }
 
         return false;
+    }
+
+    public int ReturnItemCount(Item item){
+        // If ammo count ever appears as -1, something went wrong
+        int ic = -1;
+        foreach (var iItem in playerInventory)
+        {
+            if(iItem.sObj == item){
+                ic = iItem.count;
+                break;
+            }
+        }
+        return ic;
+    }
+
+    public void DecrementItemCount(Item item){
+        foreach (var iItem in playerInventory)
+        {
+            if(iItem.sObj == item){
+                iItem.count--;
+
+                if(iItem.count <= 0){
+                    // Remove item from inventory
+                    if(ItemEquipped(item)){
+                        RemoveFromEquipped(item);
+                        playerInventory.Remove(iItem);
+                    }
+                }
+
+                SetupItemUIButtons();
+                return;
+            }
+        }
     }
 
     bool AlphabeticallyFirst(string a, string b){

@@ -18,7 +18,7 @@ public class ControlsManager : MonoBehaviour
     private PauseMenu pauseMenu;
     [SerializeField] int numberOfActionsToExclude = 0;
     
-    // called whenever script's gameobject is enabled
+    // obsolete, I think
     public void OnEnable()
     {
         
@@ -63,7 +63,56 @@ public class ControlsManager : MonoBehaviour
             }
         // }
 
+        // foreach(InputAction action in playerInputComponent.actions.actionMaps[0].actions){
+        //     if(action.name == "Attack" || action.name == "Ranged Attack")
+        //         Debug.Log(action.name + ": " + action.bindings[0].ToDisplayString());
+        // }
+    }
 
+    public void Initialize(){
+        playerInputComponent = FindObjectOfType<PlayerInput>();
+        pauseMenu = FindObjectOfType<PauseMenu>();
+
+        applyButtonCover.SetActive(true);
+        undoButtonCover.SetActive(true);
+        
+        // (if bindings don't automatically save)
+        // Load saved bindings from playerprefs
+        LoadBindings();
+        
+        foreach(Transform child in rebinderContainer){
+            Destroy(child.gameObject);
+        }
+
+        // Generate rebinders
+        int numberOfRebindersToGenerate = playerInputComponent.actions.actionMaps[0].actions.Count - numberOfActionsToExclude;
+        
+        for (int actionIndex = 0; actionIndex < numberOfRebindersToGenerate; actionIndex++)
+        {
+            InputAction a = playerInputComponent.actions.actionMaps[0].actions[actionIndex];
+
+            if(a.bindings[0].isComposite){
+                // For loop starts at 1 because the structure of bindings is such that the first (empty)
+                // binding is marked as composite, while the subsequent ones are 'isPartOfComposite'
+                for (int bindingIndex = 1; bindingIndex < a.bindings.Count; bindingIndex++)
+                {
+                    GameObject r = Instantiate(rebinderPrefab, rebinderContainer);
+                    SetupRebinder(r, actionIndex, bindingIndex);
+                }
+            }
+            else{
+                GameObject r = Instantiate(rebinderPrefab, rebinderContainer);
+                // Setup with:
+                // action map, action index to rebind, rebind ui popup gameobject, instance of this script so it can add listener for onrebind
+                SetupRebinder(r, actionIndex);
+            }
+            
+        }
+
+        // foreach(InputAction action in playerInputComponent.actions.actionMaps[0].actions){
+        //     if(action.name == "Attack" || action.name == "Ranged Attack")
+        //         Debug.Log(action.name + ": " + action.bindings[0].ToDisplayString());
+        // }
     }
 
     // Setup for single binding action
@@ -84,6 +133,7 @@ public class ControlsManager : MonoBehaviour
     }
 // Standard binding overload
     public void OnRebind(InputAction actionToRebind, Rebinder rebinder){
+        
         IEnumerable<InputBinding> originalBindings = playerInputComponent.actions.bindings;
 
         bool settingsModified = true;
@@ -95,7 +145,8 @@ public class ControlsManager : MonoBehaviour
         var rebind = actionToRebind.PerformInteractiveRebinding()
             .WithCancelingThrough("<Keyboard>/escape")
             .OnCancel(operation => { rebinder.UpdateText(); rebindPopup.SetActive(false); settingsModified = false; operation.Dispose();})
-            .OnComplete(operation => { CheckForConflicts(); if(actionToRebind.name == "Attack"){ UpdateAllAttackBindings();};rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();});
+            .OnComplete(operation => { CheckForConflicts(); if(actionToRebind.name == "Attack"){ UpdateAllAttackBindings();}; 
+                if(actionToRebind.name == "Off-Hand Attack"){ UpdateOffHandBindings();}; rebinder.UpdateText(); rebindPopup.SetActive(false); operation.Dispose();});
 
         rebind.Start();
 
@@ -105,17 +156,30 @@ public class ControlsManager : MonoBehaviour
             {
                 if(binding.effectivePath == newBinding.effectivePath){
                     if(binding.action != actionToRebind.name){
-                        if(binding.action != "Melee Power Attack" && actionToRebind.name != "Attack"){
-                            // Undo rebind, show warning on UI
-                            bindingConflictPopup.SetText("'"+ binding.ToDisplayString() + "' is already in use by another action. To bind '" + binding.ToDisplayString() +
-                            "' to this action, either bind '" + binding.action + "' to a different key or select an alternate key to bind '" + actionToRebind.name + "' to.");
-                            bindingConflictPopup.gameObject.SetActive(true);
-
-                            settingsModified = false;
-                            // (binding to apply, binding group, binding to override)
-                            ResolveBindingConflict(actionToRebind, rebinder, binding, newBinding);
+                        if(actionToRebind.name == "Attack"){
+                            if(binding.action != "Melee Power Attack" && binding.action != "Ranged Attack"){
+                                UndoRebind();
+                            }
+                        }
+                        else if(actionToRebind.name == "Off-Hand Attack"){
+                            if(binding.action != "Melee Off-Hand Power Attack" && binding.action != "Cancel Ranged Attack"){
+                                UndoRebind();
+                            }
+                        }
+                        else{
+                            UndoRebind();
                         }
                     }
+                }
+
+                void UndoRebind(){
+                    bindingConflictPopup.SetText("'"+ binding.ToDisplayString() + "' is already in use by another action. To bind '" + binding.ToDisplayString() +
+                    "' to this action, either bind '" + binding.action + "' to a different key or select an alternate key to bind '" + actionToRebind.name + "' to.");
+                    bindingConflictPopup.gameObject.SetActive(true);
+
+                    settingsModified = false;
+                    // (binding to apply, binding group, binding to override)
+                    ResolveBindingConflict(actionToRebind, rebinder, binding, newBinding);
                 }
             }
 
@@ -124,17 +188,21 @@ public class ControlsManager : MonoBehaviour
 
         void UpdateAllAttackBindings(){
             playerInputComponent.actions["Melee Power Attack"].ApplyBindingOverride(0, actionToRebind.bindings[0].effectivePath);
-            playerInputComponent.actions["Ranged Attack"].ApplyBindingOverride(0, actionToRebind.bindings[0].effectivePath);
-            foreach(Transform rebinderGameObject in rebinderContainer){
-                Rebinder r = rebinderGameObject.GetComponent<Rebinder>();
-                if(r.action.name == "Melee Power Attack"){
-                    r.UpdateText();
-                }
-                if(r.action.name == "Ranged Attack"){
-                    r.UpdateText();
-                }
-            }
+            playerInputComponent.actions["Ranged Attack"].ApplyBindingOverride
+                (0, new InputBinding{ overrideInteractions = "slowTap(duration=" + 1 + ")",
+                overridePath = actionToRebind.bindings[0].effectivePath });
         }
+
+        void UpdateOffHandBindings(){
+            playerInputComponent.actions["Melee Off-Hand Power Attack"].ApplyBindingOverride(0, actionToRebind.bindings[0].effectivePath);
+            playerInputComponent.actions["Cancel Ranged Attack"].ApplyBindingOverride(0, actionToRebind.bindings[0].effectivePath);
+
+        }
+
+        // foreach(InputAction action in playerInputComponent.actions.actionMaps[0].actions){
+        //     if(action.name == "Attack" || action.name == "Ranged Attack")
+        //         Debug.Log(action.name + ": " + action.bindings[0].ToDisplayString());
+        // }
     }
 // Overload for a binding that is part of a composite
     public void OnRebind(InputAction actionToRebind, Rebinder rebinder, int bindingIndex){
@@ -221,28 +289,29 @@ public class ControlsManager : MonoBehaviour
     }
 
     public void SaveBindings(){
-        var rebinds = playerInputComponent.actions.SaveBindingOverridesAsJson();
+        var rebinds = FindObjectOfType<PlayerInput>().actions.SaveBindingOverridesAsJson();
         PlayerPrefs.SetString("Keybindings", rebinds);
-
-        // foreach (Transform rebinder in rebinderContainer)
-        // {
-        //     Rebinder r = rebinder.GetComponent<Rebinder>();
-        //     if(r.holdToggle.isOn){
-        //         PlayerPrefs.SetInt(r.action.name + "_holdEnabled", 1);
-        //         PlayerPrefs.SetFloat(r.action.name + "_holdTime", r.holdTime);
-        //     }
-        //     else{
-        //         PlayerPrefs.SetInt(r.action.name + "_holdEnabled", 0);
-        //     }
-
-        //     r.UpdateOriginalBinding();
-        // }
     }
 
     void LoadBindings(){
         if(PlayerPrefs.HasKey("Keybindings")){
             var rebinds = PlayerPrefs.GetString("Keybindings");
             playerInputComponent.actions.LoadBindingOverridesFromJson(rebinds);
+
+
+            if(FindObjectOfType<PlayerEquipment>().weaponR){
+                if(FindObjectOfType<PlayerEquipment>().weaponR.rangedWeaponScriptableObject){
+                    float drawTime = FindObjectOfType<PlayerEquipment>().weaponR.rangedWeaponScriptableObject.drawTime;
+                    
+                    InputAction rangedAttackAction = FindObjectOfType<PlayerInput>().actions["Ranged Attack"];
+
+                    rangedAttackAction.ApplyBindingOverride(new InputBinding{ overrideInteractions = "slowTap(duration=" + drawTime + ")", 
+                        overridePath = rangedAttackAction.bindings[0].effectivePath});
+                }
+                    
+
+            }
+
         }
     }
 

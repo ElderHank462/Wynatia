@@ -19,7 +19,6 @@ public class PlayerCombatAgent : MonoBehaviour
 
     DamageTrigger mainHandDamageTrigger;
     DamageTrigger offHandDamageTrigger;
-    DamageTrigger ammunitionDamageTrigger;
 
     [Header("This gameObject must be named 'CombatAgent'. Container gameObjects must be named \n 'mainHandContainer,' 'offHandContainer,' and 'rangedContainer'.")]
     // public MeleeWeapon meleeWeapon;
@@ -51,6 +50,8 @@ public class PlayerCombatAgent : MonoBehaviour
     private PlayerEquipment playerEquipment;
     ReticleController reticleController;
 
+    [SerializeField] float ammunitionAppliedForce = 10f;
+
     void Start(){
         playerInput = FindObjectOfType<PlayerInput>();
 
@@ -59,9 +60,10 @@ public class PlayerCombatAgent : MonoBehaviour
         playerInput.actions["Off-Hand Attack"].performed += _ => M_OffAttack();
         playerInput.actions["Melee Power Attack"].performed += _ => M_MainPowerAtack();
         playerInput.actions["Melee Off-Hand Power Attack"].performed += _ => M_OffPowerAtack();
-        playerInput.actions["Ranged Attack"].started += _ => ReadyRangedWeapon();
-        playerInput.actions["Ranged Attack"].performed += _ => RangedAttack();
-        playerInput.actions["Ranged Attack"].canceled += _ => CancelRangedAttack();
+        playerInput.actions["Ranged Attack"].started += _ => RangedWeaponFunction(ReadyRangedWeapon);
+        playerInput.actions["Ranged Attack"].performed += _ => RangedWeaponFunction(RangedAttack);
+        playerInput.actions["Ranged Attack"].canceled += _ => RangedWeaponFunction(CancelRangedAttack);
+        playerInput.actions["Cancel Ranged Attack"].performed += _ => RangedWeaponFunction(CancelRangedAttack);
     
         mainHandContainer = transform.Find("mainHandContainer").gameObject;
         offHandContainer = transform.Find("offHandContainer").gameObject;
@@ -112,6 +114,14 @@ public class PlayerCombatAgent : MonoBehaviour
 
     void OnApplicationQuit(){
         // For some reason, this saves the opposite of the weapon's actual state, hence the '!'
+        if(playerEquipment.weaponR){
+            if(playerEquipment.weaponR.meleeWeaponScriptableObject){
+                weaponSheathed = mainHandAnimator.GetBool("Sheathed");
+            }
+            else if(playerEquipment.weaponR.rangedWeaponScriptableObject){
+                weaponSheathed = rangedAnimator.GetBool("Sheathed");
+            }
+        }
         ES3.Save("meleeWeaponsSheathed", !weaponSheathed);
     }
     
@@ -125,11 +135,10 @@ public class PlayerCombatAgent : MonoBehaviour
     public void UpdateCombatAgentVariables(){
         mainHandDamageTrigger = null;
         offHandDamageTrigger = null;
-        ammunitionDamageTrigger = null;
         
         mainHandDamageTrigger = mainHandContainer.GetComponentInChildren<DamageTrigger>();
         offHandDamageTrigger = offHandContainer.GetComponentInChildren<DamageTrigger>();
-        ammunitionDamageTrigger = ammunitionContainer.GetComponentInChildren<DamageTrigger>();
+        // ammunitionDamageTrigger = ammunitionContainer.GetComponentInChildren<DamageTrigger>();
 
         playerEquipment = FindObjectOfType<PlayerEquipment>();
 
@@ -149,10 +158,8 @@ public class PlayerCombatAgent : MonoBehaviour
                 rangedDamage = playerEquipment.weaponR.rangedWeaponScriptableObject.baseDamage;
                 rangedCooldownTime = playerEquipment.weaponR.rangedWeaponScriptableObject.cooldownTime;
 
-                // rangedDamageTrigger.active = false;
-                // rangedDamageTrigger.damageAmount = rangedDamage;
-
                 float drawTime = playerEquipment.weaponR.rangedWeaponScriptableObject.drawTime;
+
             }
 
         }
@@ -172,6 +179,11 @@ public class PlayerCombatAgent : MonoBehaviour
         offHandAnimator = offHandContainer.GetComponent<Animator>();
         rangedAnimator = rangedContainer.GetComponent<Animator>();
 
+    }
+
+    public void RepairCombatAgentAfterMenuClose(){
+        UpdateAnimators();
+        CancelRangedAttack();
     }
 
     public void UpdateAnimators(){
@@ -195,6 +207,10 @@ public class PlayerCombatAgent : MonoBehaviour
             else{
                 SetAnimatorsSheathedParameterAndInputAction(true, true, weaponSheathed);
                 ammunitionDisplay.gameObject.SetActive(!weaponSheathed);
+
+                // This didn't work :/
+                // if(ammunitionContainer.transform.childCount != 0)
+                //     rangedAnimator.SetTrigger("Cancel");
             }
         }
         // Fists
@@ -205,8 +221,9 @@ public class PlayerCombatAgent : MonoBehaviour
 
         if(ammunitionDisplay.gameObject.activeSelf){
             // Also display count
-            if(playerEquipment.ammunition)
-                ammunitionDisplay.SetText(playerEquipment.ammunition.itemName);
+            if(playerEquipment.ammunition){
+                ammunitionDisplay.SetText(playerEquipment.ammunition.itemName + " ("+ FindObjectOfType<PlayerInventory>().ReturnItemCount(playerEquipment.ammunition) + ")");
+            }
             else
                 ammunitionDisplay.SetText("No ammunition equipped");
         }
@@ -224,10 +241,14 @@ public class PlayerCombatAgent : MonoBehaviour
         playerInput.actions["Off-Hand Attack"].Disable();
         playerInput.actions["Melee Off-Hand Power Attack"].Disable();
         playerInput.actions["Ranged Attack"].Disable();
+        playerInput.actions["Cancel Ranged Attack"].Disable();
+
+        playerInput.actions["Sheathe Weapon"].Enable();
 
         if(!m){
             playerInput.actions["Attack"].Enable();
             playerInput.actions["Melee Power Attack"].Enable();
+            playerInput.actions["Sheathe Weapon"].Enable();
         }
         if(!o){
             playerInput.actions["Off-Hand Attack"].Enable();
@@ -237,6 +258,8 @@ public class PlayerCombatAgent : MonoBehaviour
             playerInput.actions["Ranged Attack"].Enable();
         }
 
+        Debug.Log("rangedAttack interactions: " + FindObjectOfType<PlayerInput>().actions["Ranged Attack"].bindings[0].effectiveInteractions);
+
         // Debug.Log("Input actions statuses");
         // Debug.Log("Attack: " + playerInput.actions["Attack"].enabled);
         // Debug.Log("Melee Power Attack: " + playerInput.actions["Melee Power Attack"].enabled);
@@ -245,28 +268,53 @@ public class PlayerCombatAgent : MonoBehaviour
         // Debug.Log("Ranged Attack: " + playerInput.actions["Ranged Attack"].enabled);
     }
 
-    void ReadyRangedWeapon(){
-        if(!Pause.PauseManagement.paused && !weaponSheathed){
-             if(playerEquipment.ammunition){
-                Debug.Log("Readying ranged weapon");
-                 rangedAnimator.speed = readyRangedWeaponAnimationClip.length / playerEquipment.weaponR.rangedWeaponScriptableObject.drawTime;
-                 rangedAnimator.SetTrigger("Ready");
+    void RangedWeaponFunction(System.Action function){
+        // If ready to fire
+        // Call function
+        if(ReadyToFire()){
 
-                 // Instantiate arrow in ammunitionContainer
-                 // Disable model collider, etc.
-                 playerEquipment.InstantiateWeapon(playerEquipment.ammunition.worldObject, ammunitionContainer.transform);
-             }
-             else{
-                 Debug.Log("You must equip some ammunition before you can attack with this weapon");
-             }
+            function();
         }
+    }
+    bool ReadyToFire(){
+        if(!Pause.PauseManagement.paused && !weaponSheathed && Time.time >= rangedRechargedTime){
+            return true;
+        }
+        return false;
+    }
+
+    void ReadyRangedWeapon(){
+        if(playerEquipment.ammunition && ammunitionContainer.transform.childCount == 0){
+            
+            // Debug.Log("Readying ranged weapon; ammunitionContainer childCount: " + ammunitionContainer.transform.childCount);
+
+            playerInput.actions["Cancel Ranged Attack"].Enable();
+            playerInput.actions["Sheathe Weapon"].Disable();
+
+            rangedAnimator.speed = readyRangedWeaponAnimationClip.length / playerEquipment.weaponR.rangedWeaponScriptableObject.drawTime;
+            rangedAnimator.SetBool("Fire", false);
+            rangedAnimator.SetBool("Cancel", false);
+            rangedAnimator.SetBool("Ready", true);
+
+            // Instantiate arrow in ammunitionContainer
+            // Disable model collider, etc.
+            playerEquipment.InstantiateWeapon(playerEquipment.ammunition.worldObject, ammunitionContainer.transform);
+        }
+        else{
+            Debug.Log("You must equip some ammunition before you can attack with this weapon");
+        }
+        
     }
 
     void CancelRangedAttack(){
-        if(!Pause.PauseManagement.paused && playerEquipment.ammunition && !weaponSheathed){
+        if(ammunitionContainer.transform.childCount != 0){
             Debug.Log("Canceled ranged attack");
             rangedAnimator.speed = 1;
-            rangedAnimator.SetTrigger("Cancel");
+            // rangedAnimator.SetTrigger("Cancel");
+            rangedAnimator.SetBool("Cancel", true);
+
+            playerInput.actions["Cancel Ranged Attack"].Disable();
+            playerInput.actions["Sheathe Weapon"].Enable();
 
             // Empty ammunitionContainer
             foreach(Transform child in ammunitionContainer.transform){
@@ -276,29 +324,55 @@ public class PlayerCombatAgent : MonoBehaviour
     }
 
     void RangedAttack(){
-        if(!Pause.PauseManagement.paused && playerEquipment.ammunition && !weaponSheathed){
-            Debug.Log("Ranged attack!");
+        if(ammunitionContainer.transform.childCount != 0){
+            Debug.Log("Ranged attack! interactions: " + FindObjectOfType<PlayerInput>().actions["Ranged Attack"].bindings[0].effectiveInteractions);
             rangedAnimator.speed = 1;
-            rangedAnimator.SetTrigger("Fire");
+            // rangedAnimator.SetTrigger("Fire");
+            rangedAnimator.SetBool("Fire", true);
+
+            playerInput.actions["Cancel Ranged Attack"].Disable();
+            playerInput.actions["Sheathe Weapon"].Enable();
 
             // Unparent ammunition from container
             GameObject ammunition = ammunitionContainer.transform.GetChild(0).gameObject;
             ammunitionContainer.transform.GetChild(0).SetParent(null);
 
-            // Re-enable its colliders
-            foreach(Transform child in ammunition.transform){
-                if(child.GetComponent<Collider>())
-                    child.GetComponent<Collider>().enabled = true;
+            // Shoot it!
+            List<Collider> cols = new List<Collider>();
+            cols.Add(playerEquipment.GetComponent<Collider>());
+            cols.AddRange(playerEquipment.GetComponentsInChildren<Collider>());
+            ammunition.GetComponent<Projectile>().Setup(cols, rangedDamage + playerEquipment.ammunition.ammunitionScriptableObject.damage);
+            ammunition.GetComponent<Rigidbody>().isKinematic = false;
+
+            Vector3 target;
+            RaycastHit hit;
+            
+            // Point projecile towards where player is looking
+            if(Physics.Raycast(Camera.main.transform.position, Camera.main.transform.forward, out hit, 500)){
+                target = hit.point;
+            }
+            else{
+                target = Camera.main.transform.position + (Camera.main.transform.forward * 500);
             }
 
-            // Shoot it!
-            // * Add a script to ammunition so that when they hit an object, if it's not an enemy the layer will return to normal and the item can be picked up again
-            ammunition.GetComponent<Rigidbody>().isKinematic = false;
-            ammunition.GetComponent<Rigidbody>().AddForce(ammunition.transform.forward * 70, ForceMode.Impulse);
+            ammunition.transform.LookAt(target);
+            ammunition.GetComponent<Rigidbody>().AddForce(ammunition.transform.forward * ammunitionAppliedForce, ForceMode.Impulse);
 
             // Remove one arrow from inventory
+            FindObjectOfType<PlayerInventory>().DecrementItemCount(playerEquipment.ammunition);
+            if(FindObjectOfType<PlayerInventory>().ReturnItemCount(playerEquipment.ammunition) <= 0){
+                playerEquipment.UnequipSlot(ref playerEquipment.ammunition);
+            }
+
+            if(playerEquipment.ammunition){
+                ammunitionDisplay.SetText(playerEquipment.ammunition.itemName + " ("+ FindObjectOfType<PlayerInventory>().ReturnItemCount(playerEquipment.ammunition) + ")");
+            }
+            else
+                ammunitionDisplay.SetText("No ammunition equipped");
             
-            
+            reticleController.SetReticle((int)ReticleController.Reticle.X);
+            rangedRechargedTime = Time.time + rangedCooldownTime;
+            StartCoroutine(ManageCooldown(rangedAnimator));
         }
     }
 
@@ -309,7 +383,7 @@ public class PlayerCombatAgent : MonoBehaviour
         }
         
         // Animate melee strike
-        if(!weaponSheathed && Time.time >= mainHandRechargedTime && !Pause.PauseManagement.paused){
+        if(!weaponSheathed && Time.time >= mainHandRechargedTime && !Pause.PauseManagement.paused && playerEquipment.weaponR){
             mainHandDamageTrigger.damageAmount = mainHandDamage;
 
             mainHandAnimator.SetTrigger("Attack");
@@ -394,17 +468,20 @@ public class PlayerCombatAgent : MonoBehaviour
     IEnumerator SetDamageTrigger(Animator anim, DamageTrigger dt){
         dt.active = true;
         yield return new WaitUntil(() => anim.GetBool("Attacking") == false);
-        anim.SetBool("On Cooldown", true);
         dt.active = false;
         StartCoroutine(ManageCooldown(anim));
     }
 
     IEnumerator ManageCooldown(Animator anim){
+        anim.SetBool("On Cooldown", true);
         if(anim == mainHandAnimator){
             yield return new WaitUntil(() => Time.time >= mainHandRechargedTime);
         }
-        else{
+        else if(anim == offHandAnimator){
             yield return new WaitUntil(() => Time.time >= offHandRechargedTime);
+        }
+        else if(anim == rangedAnimator){
+            yield return new WaitUntil(() => Time.time >= rangedRechargedTime);
         }
 
         reticleController.SetReticle((int)ReticleController.Reticle.Dot);
