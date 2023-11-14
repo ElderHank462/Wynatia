@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using TMPro;
-
+// Documentation: https://github.com/ElderHank462/Wynatia/wiki/PlayerCombatAgent
 public class PlayerCombatAgent : MonoBehaviour
 {
     [SerializeField] private PlayerInput playerInput;
-    
+
     public GameObject mainHandContainer;
     public GameObject offHandContainer;
     public GameObject rangedContainer;
@@ -45,15 +45,17 @@ public class PlayerCombatAgent : MonoBehaviour
     float offHandRechargedTime = 0;
     float rangedRechargedTime = 0;
 
-    bool attackingLastFrame = false;
 
     private PlayerEquipment playerEquipment;
     ReticleController reticleController;
 
-    [SerializeField] float ammunitionAppliedForce = 10f;
+    [SerializeField] float ammunitionAppliedForce = 7f;
 
     void Start(){
-        playerInput = FindObjectOfType<PlayerInput>();
+        // playerInput = FindObjectOfType<PlayerInput>();
+        // playerEquipment = FindObjectOfType<PlayerEquipment>();
+        // reticleController = FindObjectOfType<ReticleController>();
+        AssignReferences();
 
         playerInput.actions["Sheathe Weapon"].performed += _ => SheatheUnsheathe();
         playerInput.actions["Attack"].performed += _ => M_MainAttack();
@@ -65,55 +67,55 @@ public class PlayerCombatAgent : MonoBehaviour
         playerInput.actions["Ranged Attack"].canceled += _ => RangedWeaponFunction(CancelRangedAttack);
         playerInput.actions["Cancel Ranged Attack"].performed += _ => RangedWeaponFunction(CancelRangedAttack);
     
-        mainHandContainer = transform.Find("mainHandContainer").gameObject;
-        offHandContainer = transform.Find("offHandContainer").gameObject;
-        rangedContainer = transform.Find("rangedContainer").gameObject;
+        // mainHandContainer = transform.Find("mainHandContainer").gameObject;
+        // offHandContainer = transform.Find("offHandContainer").gameObject;
+        // rangedContainer = transform.Find("rangedContainer").gameObject;
+
+        // mainHandAnimator = mainHandContainer.GetComponent<Animator>();
+        // offHandAnimator = offHandContainer.GetComponent<Animator>();
+
+        // rangedAnimator = rangedContainer.GetComponent<Animator>();
+
+    }
+
+    void AssignReferences(){
+        playerInput = FindObjectOfType<PlayerInput>();
+        playerEquipment = FindObjectOfType<PlayerEquipment>();
+        reticleController = FindObjectOfType<ReticleController>();
 
         mainHandAnimator = mainHandContainer.GetComponent<Animator>();
         offHandAnimator = offHandContainer.GetComponent<Animator>();
-
         rangedAnimator = rangedContainer.GetComponent<Animator>();
-
-        playerEquipment = FindObjectOfType<PlayerEquipment>();
-        reticleController = FindObjectOfType<ReticleController>();
     }
 
-    void DetermineAttackType(){
-        if(playerEquipment.weaponR){
-            if(playerEquipment.weaponR.meleeWeaponScriptableObject){
-                M_MainAttack();
-            }
-            else{
-                RangedAttack();
-            }
-        }
-    }
 
 
     public void Setup(){
-        mainHandContainer = transform.Find("mainHandContainer").gameObject;
-        offHandContainer = transform.Find("offHandContainer").gameObject;
-        rangedContainer = transform.Find("rangedContainer").gameObject;
+        // mainHandContainer = transform.Find("mainHandContainer").gameObject;
+        // offHandContainer = transform.Find("offHandContainer").gameObject;
+        // rangedContainer = transform.Find("rangedContainer").gameObject;
         // ammunitionContainer = transform.Find("ammunitionContainer").gameObject;
 
-        mainHandAnimator = mainHandContainer.GetComponent<Animator>();
-        offHandAnimator = offHandContainer.GetComponent<Animator>();
+        // mainHandAnimator = mainHandContainer.GetComponent<Animator>();
+        // offHandAnimator = offHandContainer.GetComponent<Animator>();
 
-        rangedAnimator = rangedContainer.GetComponent<Animator>();
+        // rangedAnimator = rangedContainer.GetComponent<Animator>();
+
+        AssignReferences();
         
         if(ES3.KeyExists("meleeWeaponsSheathed")){
             weaponSheathed = ES3.Load<bool>("meleeWeaponsSheathed");
         }
+        
 
-        mainHandAnimator.SetBool("Sheathed", weaponSheathed);
-        offHandAnimator.SetBool("Sheathed", weaponSheathed);
+        // mainHandAnimator.SetBool("Sheathed", weaponSheathed);
+        // offHandAnimator.SetBool("Sheathed", weaponSheathed);
 
         UpdateCombatAgentVariables();
         UpdateAnimators();
     }
 
     void OnApplicationQuit(){
-        // For some reason, this saves the opposite of the weapon's actual state, hence the '!'
         if(playerEquipment.weaponR){
             if(playerEquipment.weaponR.meleeWeaponScriptableObject){
                 weaponSheathed = mainHandAnimator.GetBool("Sheathed");
@@ -122,6 +124,7 @@ public class PlayerCombatAgent : MonoBehaviour
                 weaponSheathed = rangedAnimator.GetBool("Sheathed");
             }
         }
+        // For some reason, this saves the opposite of the weapon's actual state, hence the '!'
         ES3.Save("meleeWeaponsSheathed", !weaponSheathed);
     }
     
@@ -140,9 +143,11 @@ public class PlayerCombatAgent : MonoBehaviour
         offHandDamageTrigger = offHandContainer.GetComponentInChildren<DamageTrigger>();
         // ammunitionDamageTrigger = ammunitionContainer.GetComponentInChildren<DamageTrigger>();
 
-        playerEquipment = FindObjectOfType<PlayerEquipment>();
+        AssignReferences();
 
-        playerInput = FindObjectOfType<PlayerInput>();
+        // playerEquipment = FindObjectOfType<PlayerEquipment>();
+
+        // playerInput = FindObjectOfType<PlayerInput>();
 
         if(playerEquipment.weaponR){
             if(mainHandDamageTrigger && playerEquipment.weaponR.meleeWeaponScriptableObject){
@@ -175,9 +180,9 @@ public class PlayerCombatAgent : MonoBehaviour
             offHandDamageTrigger.damageAmount = offHandDamage;
         }
 
-        mainHandAnimator = mainHandContainer.GetComponent<Animator>();
-        offHandAnimator = offHandContainer.GetComponent<Animator>();
-        rangedAnimator = rangedContainer.GetComponent<Animator>();
+        // mainHandAnimator = mainHandContainer.GetComponent<Animator>();
+        // offHandAnimator = offHandContainer.GetComponent<Animator>();
+        // rangedAnimator = rangedContainer.GetComponent<Animator>();
 
     }
 
@@ -206,7 +211,9 @@ public class PlayerCombatAgent : MonoBehaviour
             // Ranged weapon
             else{
                 SetAnimatorsSheathedParameterAndInputAction(true, true, weaponSheathed);
+                Debug.Log("Time: " + Time.time + "; preparing to set ammunitionDisplay visibility to: " + !weaponSheathed);
                 ammunitionDisplay.gameObject.SetActive(!weaponSheathed);
+                Debug.Log("Time: " + Time.time + "; ammunitionDisplay visibility: " + !weaponSheathed);
 
                 // This didn't work :/
                 // if(ammunitionContainer.transform.childCount != 0)
@@ -219,6 +226,10 @@ public class PlayerCombatAgent : MonoBehaviour
             ammunitionDisplay.gameObject.SetActive(false);
         }
 
+        UpdateAmmunitionDisplay();
+    }
+
+    public void UpdateAmmunitionDisplay(){
         if(ammunitionDisplay.gameObject.activeSelf){
             // Also display count
             if(playerEquipment.ammunition){
@@ -258,7 +269,7 @@ public class PlayerCombatAgent : MonoBehaviour
             playerInput.actions["Ranged Attack"].Enable();
         }
 
-        Debug.Log("rangedAttack interactions: " + FindObjectOfType<PlayerInput>().actions["Ranged Attack"].bindings[0].effectiveInteractions);
+        // Debug.Log("rangedAttack interactions: " + FindObjectOfType<PlayerInput>().actions["Ranged Attack"].bindings[0].effectiveInteractions);
 
         // Debug.Log("Input actions statuses");
         // Debug.Log("Attack: " + playerInput.actions["Attack"].enabled);
@@ -284,7 +295,10 @@ public class PlayerCombatAgent : MonoBehaviour
     }
 
     void ReadyRangedWeapon(){
-        if(playerEquipment.ammunition && ammunitionContainer.transform.childCount == 0){
+        // Added ammunition count check because occasionally (not reproduceably) the player could use ammo infinitely
+        // and the ammunition would run into the negatives
+        // Don't know if this fixes it because I can't reproduce the issue, but if it comes up again then I guess this fix doesn't cut it
+        if(playerEquipment.ammunition && ammunitionContainer.transform.childCount == 0 && FindObjectOfType<PlayerInventory>().ReturnItemCount(playerEquipment.ammunition) > 0){
             
             // Debug.Log("Readying ranged weapon; ammunitionContainer childCount: " + ammunitionContainer.transform.childCount);
 
@@ -359,9 +373,12 @@ public class PlayerCombatAgent : MonoBehaviour
             ammunition.GetComponent<Rigidbody>().AddForce(ammunition.transform.forward * ammunitionAppliedForce, ForceMode.Impulse);
 
             // Remove one arrow from inventory
-            FindObjectOfType<PlayerInventory>().DecrementItemCount(playerEquipment.ammunition);
+            FindObjectOfType<PlayerInventory>().DecrementItemCount(playerEquipment.ammunition, true);
             if(FindObjectOfType<PlayerInventory>().ReturnItemCount(playerEquipment.ammunition) <= 0){
+                // Debug.Log("a");
+                AssignReferences();
                 playerEquipment.UnequipSlot(ref playerEquipment.ammunition);
+                // Debug.Log("d");
             }
 
             if(playerEquipment.ammunition){

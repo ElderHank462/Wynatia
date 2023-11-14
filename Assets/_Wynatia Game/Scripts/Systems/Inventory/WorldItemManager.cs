@@ -40,22 +40,19 @@ public class WorldItemManager : MonoBehaviour
         Instantiate(ES3.Load<GameObject>("World Items Container"), Vector3.zero, Quaternion.identity, transform);
     }
 
-
-
-
-
-
-
-
     void Save(){
         worldItems.Clear();
         
         WorldItem[] scripts = FindObjectsOfType<WorldItem>();
         foreach (var script in scripts)
         {
-            if(script.scriptableObject.type == Item.ItemType.Arrows || script.scriptableObject.type == Item.ItemType.Bolts || script.scriptableObject.type == Item.ItemType.Projectile)
-            // If the player saves while drawing their bow, I think this will save the arrow being drawn as a world item...
-                script.transform.parent = transform;
+            if(script.scriptableObject.type == Item.ItemType.Arrows || script.scriptableObject.type == Item.ItemType.Bolts || script.scriptableObject.type == Item.ItemType.Projectile){
+                if(script.pickupEnabled && !script.transform.parent.CompareTag("Player")){
+                    // Parent check above prevents the game from saving an arrow that the player is drawing/has drawn but not fired
+
+                    script.transform.parent = transform;
+                }
+            }
         }
 
         List<bool> kinematicValues = new List<bool>();
@@ -142,9 +139,15 @@ public class WorldItemManager : MonoBehaviour
                 // Debug.Log("Instantiated: " + worldItems[i].name);
                 WorldItem wI = g.GetComponent<WorldItem>();
                 wI.instanceKinematic = kinematicValues[i];
-                // Don't want to enable physics colliders for projectiles
-                if(wI.scriptableObject.type != Item.ItemType.Arrows || wI.scriptableObject.type != Item.ItemType.Bolts || wI.scriptableObject.type != Item.ItemType.Projectile){
+                // Don't want to enable physics colliders for worldItems
+                if(!wI.disableMyCollidersIfKinematic || !wI.instanceKinematic){
                     wI.EnablePhysicsColliders();
+                    // Debug.Log("enabled physics cols for: " + wI.gameObject);
+                    // **** This is working as intended, arrow colliders aren't being enabled here
+                    // something else (before or after?) must be enabling them...
+                }
+                else{
+                    wI.DisablePhysicsColliders();
                 }
                 wI.EnablePickup(kinematicValues[i]);
 

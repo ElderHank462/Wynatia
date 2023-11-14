@@ -69,6 +69,8 @@ MonoBehaviour:
   active: 0
   deactivateOnHit: 1
   damageAmount: 0
+  disableParentItemPickupOnHit: 1
+  parentItem: {fileID: 8334020880496138616}
 --- !u!1 &401266815209179341
 GameObject:
   m_ObjectHideFlags: 0
@@ -315,6 +317,8 @@ MonoBehaviour:
   instanceKinematic: 0
   modelColliders:
   - {fileID: 8643697932584353633}
+  pickupEnabled: 1
+  disableMyCollidersIfKinematic: 1
 --- !u!114 &3556736247454653019
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -328,7 +332,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   arrow: 1
-  hitBehavior: 2
   collidersToIgnore: []
   damageTrigger: {fileID: 8373725110916336068}
 --- !u!114 &8939599766185250162

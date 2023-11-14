@@ -16,9 +16,9 @@ public class Projectile : MonoBehaviour
     [Tooltip("Setting this to true will cause the projectile to turn to face its trajectory as it flies.")]
     public bool arrow = true;
 
-    [Tooltip("These layers will cause the projectile to carry out its hitBehavior. If the projectile hits any other layer it will return to being an item.")]
+    // [Tooltip("These layers will cause the projectile to carry out its hitBehavior. If the projectile hits any other layer it will return to being an item.")]
     // public List<string> targetTag;
-    public HitBehavior hitBehavior;
+    // public HitBehavior hitBehavior;
     public List<Collider> collidersToIgnore = new List<Collider>();
 
     private Rigidbody rb;
@@ -51,14 +51,29 @@ public class Projectile : MonoBehaviour
         if(collidersToIgnore.Contains(collision.collider)){
             // Disable colliders
             GetComponent<WorldItem>().DisablePhysicsColliders();
+            // This is undone in OnTriggerExit below
         }
         else{
             // Don't know how to setup different hit behaviors depending on whether target was hit or not
+            // 11.10.23: Maybe just call ILaunchable.Hit whenever and handle different hit behaviors in the ILaunchable
+            // make hitEffect variable in IDamageable
+            // for example, for a "stick" behavior the "Stick" script could check if collision has IDamageable script
+                // if so
+                    // if it has a hit effect instantiate it
+                    // if the surface is hard don't reparent to it and keep physics colliders enabled and instanceKinematic equal to false
+                    // damage the object (should take care of itself with damage trigger)
+                    // disable pickup
+                // if not
+                    // reparent to object and set instanceKinematic to true
+                    // enable pickup
+
             
             arrow = false;
             // if(targetTag.Cont collision.gameObject.CompareTag(targetTag)){
                 GetComponent<ILaunchable>().Hit(collision.collider);
-                enabled = false;
+                // A little more assertive, perhaps?
+                Destroy(this);
+                // enabled = false;
             // }
             // else{
             //     // Do the hit behavior

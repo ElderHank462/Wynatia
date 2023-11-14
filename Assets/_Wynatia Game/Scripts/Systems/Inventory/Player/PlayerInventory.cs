@@ -137,6 +137,17 @@ public class PlayerInventory : MonoBehaviour
         {
             if(item.sObj.itemName == a.sObj.itemName){
                 item.count++;
+                
+                // If item is currently equipped ammunition, update the ammo display
+                PlayerEquipment playerEquipment = FindObjectOfType<PlayerEquipment>();
+                if(playerEquipment.ammunition)
+                {
+                    if(playerEquipment.ammunition == a.sObj){
+                        // Update ammo display
+                        FindObjectOfType<PlayerCombatAgent>().UpdateAmmunitionDisplay();
+                    }
+                }
+
                 SetupItemUIButtons();
                 return;
             }
@@ -259,7 +270,8 @@ public class PlayerInventory : MonoBehaviour
         }
 
         // Setup the item actions menu to show equip
-        itemActionsMenu.Setup(selectedItem);
+        if(selectedItem != null)
+            itemActionsMenu.Setup(selectedItem);
         SetupItemUIButtons();
         RefreshSelected();
     }
@@ -429,18 +441,31 @@ public class PlayerInventory : MonoBehaviour
         return ic;
     }
 
-    public void DecrementItemCount(Item item){
+    public void DecrementItemCount(Item item, bool usingUpAmmunition = false){
         foreach (var iItem in playerInventory)
         {
             if(iItem.sObj == item){
                 iItem.count--;
 
                 if(iItem.count <= 0){
+                    Debug.Log("item count: " + iItem.count);
                     // Remove item from inventory
                     if(ItemEquipped(item)){
+                        Debug.Log("item is equipped");
+                        
                         RemoveFromEquipped(item);
-                        playerInventory.Remove(iItem);
+                        
+                        PlayerEquipment playerEquipment = FindObjectOfType<PlayerEquipment>();
+                        Debug.Log("playerEquipment found on gameobject: " + playerEquipment.gameObject.name);
+                        playerEquipment.UnequipSlot(ref playerEquipment.ammunition);
+                        Debug.Log("ammunition is now: " + playerEquipment.ammunition);
+                        selectedItem = null;
+                        // Hide item actions and inspector
+                        itemActionsMenu.gameObject.SetActive(false);
+                        itemInspector.gameObject.SetActive(false);
                     }
+
+                    playerInventory.Remove(iItem);
                 }
 
                 SetupItemUIButtons();

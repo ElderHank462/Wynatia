@@ -11,6 +11,9 @@ public class WorldItem : MonoBehaviour
     public Vector3 positionToSave = Vector3.zero;
     public bool instanceKinematic = false;
     public List<Collider> modelColliders = new List<Collider>();
+    // This variable is purely for information; changing it outside of this script won't do anything.
+    public bool pickupEnabled = true;
+    public bool disableMyCollidersIfKinematic = false;
 
     
     void Start(){
@@ -85,6 +88,8 @@ public class WorldItem : MonoBehaviour
         foreach(Transform child in transform){
             child.gameObject.layer = 2;
         }
+
+        pickupEnabled = false;
     }
 
     public void EnablePickup(bool kinematic = false){
@@ -97,6 +102,8 @@ public class WorldItem : MonoBehaviour
         foreach(Transform child in transform){
             child.gameObject.layer = 3;
         }
+        
+        pickupEnabled = true;
     }
 
     public void DisablePhysicsColliders(){
@@ -107,8 +114,9 @@ public class WorldItem : MonoBehaviour
         yield return new WaitForSeconds(Time.fixedDeltaTime);
 
         foreach(Collider col in modelColliders){
-            // If the collider on this transform is for rigidbody physics, enable it
-                col.enabled = false;
+            // If the collider on this transform is for rigidbody physics, disable it
+            col.enabled = false;
+            // Debug.Log("collider '" + col.name + "' disabled");
         }
     }
 
