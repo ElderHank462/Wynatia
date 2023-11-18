@@ -104,9 +104,11 @@ public class PlayerInventory : MonoBehaviour
 
     void LoadInventory(){
         if(ES3.KeyExists("Player_Inventory")){
-            ES3.LoadInto("Player_Inventory", this);
-            SetupItemUIButtons();
-            RefreshSelected();
+            if(!ES3.KeyExists("overwriteSaveData")){
+                ES3.LoadInto("Player_Inventory", this);
+                SetupItemUIButtons();
+                RefreshSelected();
+            }
         }
     }
 

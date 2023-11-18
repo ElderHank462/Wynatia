@@ -44,7 +44,7 @@ public class PlayerEquipment : MonoBehaviour
         ES3.Save("Player_Equipment", this);
     }
     void LoadEquipment(){
-        if(ES3.KeyExists("Player_Equipment")){
+        if(ES3.KeyExists("Player_Equipment") && !ES3.KeyExists("overwriteSaveData")){
             ES3.LoadInto("Player_Equipment", this);
 
             playerCombatAgent.mainHandContainer = playerCombatAgent.transform.Find("mainHandContainer").gameObject;

@@ -104,9 +104,12 @@ public class PlayerCombatAgent : MonoBehaviour
         AssignReferences();
         
         if(ES3.KeyExists("meleeWeaponsSheathed")){
-            weaponSheathed = ES3.Load<bool>("meleeWeaponsSheathed");
+            if(!ES3.KeyExists("overwriteSaveData")){
+                weaponSheathed = ES3.Load<bool>("meleeWeaponsSheathed");
+            }
         }
-        
+
+
 
         // mainHandAnimator.SetBool("Sheathed", weaponSheathed);
         // offHandAnimator.SetBool("Sheathed", weaponSheathed);
@@ -126,6 +129,8 @@ public class PlayerCombatAgent : MonoBehaviour
         }
         // For some reason, this saves the opposite of the weapon's actual state, hence the '!'
         ES3.Save("meleeWeaponsSheathed", !weaponSheathed);
+        Debug.Log("deleted overwriteSaveData key");
+        ES3.DeleteKey("overwriteSaveData");
     }
     
     public void SheatheUnsheathe(){

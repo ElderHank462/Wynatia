@@ -91,7 +91,7 @@ public class WorldItemManager : MonoBehaviour
     }
 
     void Load(){
-        if(ES3.KeyExists("World Items List")){
+        if(ES3.KeyExists("World Items List") && !ES3.KeyExists("overwriteSaveData")){
             // On the third play mode entry, kinematic object (armor) spawns twice even though only one instance was supposed to be saved
             // One spawns kinematic (as intended) but at player's position
             // The other spawns near the bow's position and is not kinematic
