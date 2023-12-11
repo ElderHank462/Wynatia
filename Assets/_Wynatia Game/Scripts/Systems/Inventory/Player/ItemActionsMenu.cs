@@ -16,15 +16,15 @@ public class ItemActionsMenu : MonoBehaviour
     // public GameObject unequipWeaponPopupL;
     
 
-    [SerializeField] private Transform equipperContainer;
-    [SerializeField] private GameObject weaponEquipper;
-    [SerializeField] private GameObject necklaceEquipper;
-    [SerializeField] private GameObject braceletEquipper;
-    [SerializeField] private GameObject ringEquipper;
-    [SerializeField] private GameObject shieldEquipper;
-    [SerializeField] private GameObject armorEquipper;
-    [SerializeField] private GameObject clothingEquipper;
-    [SerializeField] private GameObject headwearEquipper;
+    public Transform equipperContainer;
+    public GameObject weaponEquipper;
+    public GameObject necklaceEquipper;
+    public GameObject braceletEquipper;
+    public GameObject ringEquipper;
+    public GameObject shieldEquipper;
+    public GameObject armorEquipper;
+    public GameObject clothingEquipper;
+    public GameObject headwearEquipper;
 
 
     public void Setup(PlayerInventory.InventoryItem item){
@@ -57,8 +57,9 @@ public class ItemActionsMenu : MonoBehaviour
             // Consumables
             case Item.ItemType.Potion:
             case Item.ItemType.Food:
-                SetButtonStates(true);
-                SetButtonTexts("Consume");
+                SetButtonStates(true, true);
+                SetButtonTexts("Consume", "Assign To Gear Wheel");
+                itemActionBButton.onClick.AddListener(delegate {playerInventory.OpenWheelToAssign(item);});
                 break;
             
             // Necklace
@@ -112,25 +113,30 @@ public class ItemActionsMenu : MonoBehaviour
             // Weapons
             case Item.ItemType.Weapon:
             case Item.ItemType.MagicWeapon:
-                SetButtonStates(true);
-                // Debug.Log("case = weapon or magicweapon");
+                SetButtonStates(true, true);
 
                 GameObject wE = Instantiate(weaponEquipper, equipperContainer);
 
                 if(!playerInventory.SelectedItemEquipped()){
-                    SetButtonTexts("Equip");
-                    // Use weapon Equipper
-                    itemActionAButton.onClick.AddListener(delegate {wE.GetComponent<IEquipper>().EquipItem(item);});
+                    SetButtonTexts("Equip", "Assign To Gear Wheel");
+                    itemActionAButton.onClick.AddListener(delegate {FindObjectOfType<EquipMenu>().gameObject.SetActive(true);});
+                    // itemActionAButton.onClick.AddListener(delegate {FindObjectOfType<EquipMenu>().Setup();});
+
+                    itemActionBButton.onClick.AddListener(delegate {playerInventory.OpenWheelToAssign(item);});
+
 
                     // Old version
+                    // // Use weapon Equipper
+                    // itemActionAButton.onClick.AddListener(delegate {wE.GetComponent<IEquipper>().EquipItem(item);});
                     // itemActionAButton.onClick.AddListener(playerInventory.EquipSelectedItem);
                 }
                 else{
-                    SetButtonTexts("Unequip");
-                    itemActionAButton.onClick.AddListener(delegate {wE.GetComponent<IEquipper>().UnequipItem(item);});
+                    SetButtonTexts("Unequip", "Assign To Gear Wheel");
+                    itemActionBButton.onClick.AddListener(delegate {playerInventory.OpenWheelToAssign(item);});
                     dropItemButton.interactable = false;
 
                     // Old version
+                    // itemActionAButton.onClick.AddListener(delegate {wE.GetComponent<IEquipper>().UnequipItem(item);});
                     // itemActionAButton.onClick.AddListener(delegate {playerEquipment.UnequipWeaponCheck(item);});
                 }
                 break;

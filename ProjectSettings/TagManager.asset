@@ -8,6 +8,7 @@ TagManager:
   - NPC
   - Item Container
   - Inventory Item
+  - Effects Post Processing
   layers:
   - Default
   - TransparentFX

@@ -87,6 +87,15 @@
                     "initialStateCheck": false
                 },
                 {
+                    "name": "Gear Wheel",
+                    "type": "Button",
+                    "id": "0a3a222a-1cb8-4cc8-9389-df2947876430",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "menu",
                     "type": "Button",
                     "id": "49abb355-87ca-4204-8a7e-24bdc479d1e5",
@@ -139,6 +148,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Cancel Gear Wheel",
+                    "type": "Button",
+                    "id": "0407535f-a802-4493-8799-73bbc4efa2f0",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Navigate Gear Wheel",
+                    "type": "Value",
+                    "id": "42e55bf7-c27a-4d27-b335-77d59f19b160",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Change Gear Wheel Item",
+                    "type": "Value",
+                    "id": "45764b69-c440-453b-b8e5-0f169dbbf4fc",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
                 }
             ],
             "bindings": [
@@ -348,6 +384,50 @@
                     "processors": "",
                     "groups": "Mouse_Keyboard",
                     "action": "Cancel Ranged Attack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d81722c0-c54a-4bfe-9e08-931bbcf9f5db",
+                    "path": "<Keyboard>/y",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Gear Wheel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "692b30a1-2cf8-4e03-92d8-a9e40647434d",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Cancel Gear Wheel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "86100764-91aa-4f4c-8cd2-3baa51e71954",
+                    "path": "<Pointer>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Navigate Gear Wheel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "689ea3cb-4bfc-438e-9549-3354977a3048",
+                    "path": "<Mouse>/scroll",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Mouse_Keyboard",
+                    "action": "Change Gear Wheel Item",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
