@@ -522,8 +522,8 @@ public class PlayerInventory : MonoBehaviour
             // Perform item's effect
             ConsumeItem(itemToUse);
         }
-        else if(itemToUse.sObj.type == Item.ItemType.Weapon ||
-                itemToUse.sObj.type == Item.ItemType.MagicWeapon)
+        else if(itemToUse.sObj.type == Item.ItemType.Weapon
+                ) // || itemToUse.sObj.type == Item.ItemType.MagicWeapon
         {
             // Time to overhaul the equipping system
         }

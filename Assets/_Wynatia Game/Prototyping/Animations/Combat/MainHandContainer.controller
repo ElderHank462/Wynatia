@@ -95,6 +95,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boolName: Attacking
   entryBehavior: 0
+  undoOnExit: 1
 --- !u!1102 &-1401591601032276147
 AnimatorState:
   serializedVersion: 6
@@ -218,6 +219,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boolName: Attacking
   entryBehavior: 1
+  undoOnExit: 1
 --- !u!114 &4560497004349311903
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -232,6 +234,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boolName: Attacking
   entryBehavior: 1
+  undoOnExit: 1
 --- !u!1102 &4939791678787170396
 AnimatorState:
   serializedVersion: 6

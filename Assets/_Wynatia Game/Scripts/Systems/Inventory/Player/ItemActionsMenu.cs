@@ -40,6 +40,8 @@ public class ItemActionsMenu : MonoBehaviour
         TextMeshProUGUI textA = itemActionAButton.GetComponentInChildren<TextMeshProUGUI>();
         TextMeshProUGUI textB = itemActionBButton.GetComponentInChildren<TextMeshProUGUI>();
         
+        itemActionAButton.interactable = true;
+        itemActionBButton.interactable = true;
         dropItemButton.interactable = true;
 
         foreach (Transform child in equipperContainer)
@@ -112,14 +114,14 @@ public class ItemActionsMenu : MonoBehaviour
 
             // Weapons
             case Item.ItemType.Weapon:
-            case Item.ItemType.MagicWeapon:
+            // case Item.ItemType.MagicWeapon:
                 SetButtonStates(true, true);
 
-                GameObject wE = Instantiate(weaponEquipper, equipperContainer);
+                // GameObject wE = Instantiate(weaponEquipper, equipperContainer);
 
                 if(!playerInventory.SelectedItemEquipped()){
                     SetButtonTexts("Equip", "Assign To Gear Wheel");
-                    itemActionAButton.onClick.AddListener(delegate {FindObjectOfType<EquipMenu>().gameObject.SetActive(true);});
+                    itemActionAButton.onClick.AddListener(delegate {FindObjectOfType<EquipMenu>().Setup(item.sObj, playerEquipment.EquipableSlotsForItemType(itemType));});
                     // itemActionAButton.onClick.AddListener(delegate {FindObjectOfType<EquipMenu>().Setup();});
 
                     itemActionBButton.onClick.AddListener(delegate {playerInventory.OpenWheelToAssign(item);});
@@ -132,6 +134,7 @@ public class ItemActionsMenu : MonoBehaviour
                 }
                 else{
                     SetButtonTexts("Unequip", "Assign To Gear Wheel");
+                    itemActionAButton.onClick.AddListener(delegate {playerEquipment.UnequipWeapon(item.sObj);});
                     itemActionBButton.onClick.AddListener(delegate {playerInventory.OpenWheelToAssign(item);});
                     dropItemButton.interactable = false;
 
@@ -147,6 +150,21 @@ public class ItemActionsMenu : MonoBehaviour
                     SetButtonTexts("Equip");
                     itemActionAButton.onClick.AddListener(delegate { playerEquipment.UnequipSlot(ref playerEquipment.ammunition);
                         playerEquipment.EquipSlot(out playerEquipment.ammunition, item.sObj); Setup(item);});
+
+                    if(playerEquipment.bothHands){
+                        if(playerEquipment.bothHands.rangedWeaponScriptableObject){
+                            if(playerEquipment.bothHands.rangedWeaponScriptableObject.ammunitionType != 
+                                item.sObj.ammunitionScriptableObject.type){
+                                    itemActionAButton.interactable = false;
+                            }
+                        }
+                        else{
+                            itemActionAButton.interactable = false;
+                        }
+                    }
+                    else{
+                        itemActionAButton.interactable = false;
+                    }
                 }
                 else{
                     SetButtonTexts("Unequip");
@@ -158,8 +176,8 @@ public class ItemActionsMenu : MonoBehaviour
             case Item.ItemType.Bolts:
                 SetButtonStates(false);
                 // Auto equip if ammunition isn't already equipped
-                if(playerEquipment.weaponR && playerEquipment.weaponR.rangedWeaponScriptableObject){
-                    if(playerEquipment.weaponR.rangedWeaponScriptableObject.ammunitionType == Ammunition.Type.Bolts && !playerEquipment.ammunition){
+                if(playerEquipment.rightHand && playerEquipment.rightHand.rangedWeaponScriptableObject){
+                    if(playerEquipment.rightHand.rangedWeaponScriptableObject.ammunitionType == Ammunition.Type.Bolts && !playerEquipment.ammunition){
                         playerEquipment.EquipSlot(out playerEquipment.ammunition, item.sObj);
                     }
                 }
@@ -168,8 +186,8 @@ public class ItemActionsMenu : MonoBehaviour
             case Item.ItemType.Projectile:
                 SetButtonStates(false);
                 // Auto equip if ammunition isn't already equipped
-                if(playerEquipment.weaponR && playerEquipment.weaponR.rangedWeaponScriptableObject){
-                    if(playerEquipment.weaponR.rangedWeaponScriptableObject.ammunitionType == Ammunition.Type.Projectile && !playerEquipment.ammunition){
+                if(playerEquipment.rightHand && playerEquipment.rightHand.rangedWeaponScriptableObject){
+                    if(playerEquipment.rightHand.rangedWeaponScriptableObject.ammunitionType == Ammunition.Type.Projectile && !playerEquipment.ammunition){
                         playerEquipment.EquipSlot(out playerEquipment.ammunition, item.sObj);
                     }
                 }
@@ -284,7 +302,7 @@ public class ItemActionsMenu : MonoBehaviour
                 return ringEquipper;
             // Weapons
             case Item.ItemType.Weapon:
-            case Item.ItemType.MagicWeapon:
+            // case Item.ItemType.MagicWeapon:
                 return weaponEquipper;
             // Shield
             case Item.ItemType.Shield:

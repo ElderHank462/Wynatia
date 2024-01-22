@@ -46,12 +46,12 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
 
         // Two-handed applies to both two-handed melee weapons and ranged weapons
         if(item.count > 1 && !item.sObj.twoHanded){
-            if(!playerEquipment.weaponR && !playerEquipment.weaponL){
+            if(!playerEquipment.rightHand && !playerEquipment.leftHand){
                 // Equip to main, off, both, or cancel?
                 popupLayout = Layout.Equip_MainBoth;
             }
-            else if(playerEquipment.weaponR && !playerEquipment.weaponL){
-                if(playerEquipment.weaponR.twoHanded){
+            else if(playerEquipment.rightHand && !playerEquipment.leftHand){
+                if(playerEquipment.rightHand.twoHanded){
                     // Replace main or cancel?
                     popupLayout = Layout.Replace_Main;
                 }
@@ -69,9 +69,9 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             }
         }
         else{
-            if(!playerEquipment.weaponR && !playerEquipment.weaponL){
+            if(!playerEquipment.rightHand && !playerEquipment.leftHand){
                 // Equip to main
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, item.sObj);
+                playerEquipment.EquipSlot(out playerEquipment.rightHand, item.sObj);
                 if(item.sObj.meleeWeaponScriptableObject)
                     AddWeaponToMainHandContainer(item.sObj);
                 else if(item.sObj.rangedWeaponScriptableObject)
@@ -79,8 +79,8 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
                 ClosePopup();
                 return;
             }
-            else if(playerEquipment.weaponR && !playerEquipment.weaponL){
-                if(!playerEquipment.weaponR.twoHanded && !item.sObj.twoHanded){
+            else if(playerEquipment.rightHand && !playerEquipment.leftHand){
+                if(!playerEquipment.rightHand.twoHanded && !item.sObj.twoHanded){
                     // Equip to off, replace main, or cancel?
                     popupLayout = Layout.Equip_Off__Replace_Main;
                 }
@@ -140,12 +140,12 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         twoA.onClick.RemoveAllListeners();
 
         if(weaponToEquip.meleeWeaponScriptableObject){
-            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
-                    playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); RemoveWeaponFromOffHandContainer(); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.rightHand); playerEquipment.UnequipSlot(ref playerEquipment.leftHand);
+                    playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); RemoveWeaponFromOffHandContainer(); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
         }
         else if(weaponToEquip.rangedWeaponScriptableObject){
-            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
-                    playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToRangedContainer(weaponToEquip); ClosePopup();});
+            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.rightHand); playerEquipment.UnequipSlot(ref playerEquipment.leftHand);
+                    playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToRangedContainer(weaponToEquip); ClosePopup();});
         }
 
         twoA.GetComponentInChildren<TextMeshProUGUI>().SetText("Yes");
@@ -159,12 +159,12 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         twoA.onClick.RemoveAllListeners();
 
         if(weaponToEquip.meleeWeaponScriptableObject){
-            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.rightHand); 
+                playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
         }
         else if(weaponToEquip.rangedWeaponScriptableObject){
-            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToRangedContainer(weaponToEquip); ClosePopup();});
+            twoA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.rightHand); 
+                playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); ClearAllWeaponContainers(); AddWeaponToRangedContainer(weaponToEquip); ClosePopup();});
         }
 
         twoA.GetComponentInChildren<TextMeshProUGUI>().SetText("Yes");
@@ -178,9 +178,9 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         threeA.onClick.RemoveAllListeners();
         threeB.onClick.RemoveAllListeners();
 
-        threeA.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
-        threeB.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); 
-            playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
+        threeA.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+        threeB.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); 
+            playerEquipment.EquipSlot(out playerEquipment.leftHand, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
 
         string textA = "Main Hand";
         string textB = "One to Each Hand";
@@ -196,10 +196,10 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             threeA.onClick.RemoveAllListeners();
             threeB.onClick.RemoveAllListeners();
 
-            threeA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
-            threeB.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponL); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
+            threeA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.rightHand); 
+                playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+            threeB.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.leftHand); 
+                playerEquipment.EquipSlot(out playerEquipment.leftHand, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
                 
             string textA = "Main Hand (Replace)";
             string textB = "Off Hand (Replace)";
@@ -213,14 +213,14 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             fourB.onClick.RemoveAllListeners();
             fourC.onClick.RemoveAllListeners();
 
-            fourA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
-            fourB.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponL); 
-                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
-            fourC.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-                playerEquipment.UnequipSlot(ref playerEquipment.weaponL);  
-                playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip);
-                playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); 
+            fourA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.rightHand); 
+                playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+            fourB.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.leftHand); 
+                playerEquipment.EquipSlot(out playerEquipment.leftHand, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
+            fourC.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.rightHand); 
+                playerEquipment.UnequipSlot(ref playerEquipment.leftHand);  
+                playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip);
+                playerEquipment.EquipSlot(out playerEquipment.leftHand, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); 
                 ClosePopup();});
 
             string textA = "Main Hand (Replace)";
@@ -238,9 +238,9 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         threeA.onClick.RemoveAllListeners();
         threeB.onClick.RemoveAllListeners();
 
-        threeA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.weaponR); 
-            playerEquipment.EquipSlot(out playerEquipment.weaponR, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
-        threeB.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.weaponL, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
+        threeA.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.rightHand); 
+            playerEquipment.EquipSlot(out playerEquipment.rightHand, weaponToEquip); AddWeaponToMainHandContainer(weaponToEquip); ClosePopup();});
+        threeB.onClick.AddListener(delegate {playerEquipment.EquipSlot(out playerEquipment.leftHand, weaponToEquip); AddWeaponToOffHandContainer(weaponToEquip); ClosePopup();});
 
         string textA = "Main Hand (Replace)";
         string textB = "Off Hand";
@@ -252,8 +252,8 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
 
     public void ClosePopup(){
         if(playerEquipment.ammunition){
-            if(!playerEquipment.weaponR || !playerEquipment.weaponR.rangedWeaponScriptableObject
-                    || playerEquipment.weaponR.rangedWeaponScriptableObject.ammunitionType != playerEquipment.ammunition.ammunitionScriptableObject.type){
+            if(!playerEquipment.rightHand || !playerEquipment.rightHand.rangedWeaponScriptableObject
+                    || playerEquipment.rightHand.rangedWeaponScriptableObject.ammunitionType != playerEquipment.ammunition.ammunitionScriptableObject.type){
                 playerEquipment.UnequipSlot(ref playerEquipment.ammunition);
             }
         }
@@ -269,13 +269,13 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
 
     void AddWeaponToMainHandContainer(Item weaponItem){
         if(weaponItem.meleeWeaponScriptableObject != null){
-            playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform);
+            playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().rightHandContainer.transform);
 
         }
     }
     void AddWeaponToOffHandContainer(Item weaponItem){
         if(weaponItem.meleeWeaponScriptableObject != null){
-            playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform);
+            playerEquipment.InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().leftHandContainer.transform);
         }
     }
     
@@ -288,23 +288,23 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
         playerEquipment = FindObjectOfType<PlayerEquipment>();
 
         // Unequip main hand
-        if(playerEquipment.weaponR == item.sObj && playerEquipment.weaponL != item.sObj){
-            if(playerEquipment.weaponR.meleeWeaponScriptableObject)
+        if(playerEquipment.rightHand == item.sObj && playerEquipment.leftHand != item.sObj){
+            if(playerEquipment.rightHand.meleeWeaponScriptableObject)
                 RemoveWeaponFromMainHandContainer();
             else
                 RemoveWeaponFromRangedContainer();
 
-            playerEquipment.UnequipSlot(ref playerEquipment.weaponR);
+            playerEquipment.UnequipSlot(ref playerEquipment.rightHand);
 
-            if(playerEquipment.weaponL){
+            if(playerEquipment.leftHand){
                 // This function also manages combat instances of weapons
                 playerEquipment.OffToMainHand();
             }
 
         }
         // Unequip off hand
-        else if(playerEquipment.weaponR != item.sObj && playerEquipment.weaponL == item.sObj){
-            playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
+        else if(playerEquipment.rightHand != item.sObj && playerEquipment.leftHand == item.sObj){
+            playerEquipment.UnequipSlot(ref playerEquipment.leftHand);
             RemoveWeaponFromOffHandContainer();
         }
         else{
@@ -313,18 +313,18 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
             // be equipped to both hands
             
             // Unequip the weapon from both hands
-            playerEquipment.UnequipSlot(ref playerEquipment.weaponL);
+            playerEquipment.UnequipSlot(ref playerEquipment.leftHand);
             RemoveWeaponFromOffHandContainer();
-            playerEquipment.UnequipSlot(ref playerEquipment.weaponR);
+            playerEquipment.UnequipSlot(ref playerEquipment.rightHand);
             RemoveWeaponFromMainHandContainer();
         }
     }
 
     void ClearAllWeaponContainers(){
-        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().rightHandContainer.transform){
             Destroy(child.gameObject);
         }
-        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().leftHandContainer.transform){
             Destroy(child.gameObject);
         }
         foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().rangedContainer.transform){
@@ -341,13 +341,13 @@ public class WeaponEquipper : MonoBehaviour, IEquipper
     }
 
     void RemoveWeaponFromMainHandContainer(){
-        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().mainHandContainer.transform){
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().rightHandContainer.transform){
             Destroy(child.gameObject);
         }
     }
 
     void RemoveWeaponFromOffHandContainer(){
-        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().offHandContainer.transform){
+        foreach(Transform child in FindObjectOfType<PlayerCombatAgent>().leftHandContainer.transform){
             Destroy(child.gameObject);
         }
     }

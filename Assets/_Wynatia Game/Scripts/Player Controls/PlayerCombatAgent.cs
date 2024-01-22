@@ -8,53 +8,54 @@ public class PlayerCombatAgent : MonoBehaviour
 {
     [SerializeField] private PlayerInput playerInput;
 
-    public GameObject mainHandContainer;
-    public GameObject offHandContainer;
+    public GameObject rightHandContainer;
+    public GameObject leftHandContainer;
+    public GameObject bothHandsContainer;
     public GameObject rangedContainer;
     public GameObject ammunitionContainer;
-    Animator mainHandAnimator;
-    Animator offHandAnimator;
+    Animator rightHandAnimator;
+    Animator leftHandAnimator;
+    Animator bothHandsAnimator;
     Animator rangedAnimator;
     public AnimationClip readyRangedWeaponAnimationClip;
 
-    DamageTrigger mainHandDamageTrigger;
-    DamageTrigger offHandDamageTrigger;
+    DamageTrigger mainDamageTrigger;
+    DamageTrigger altDamageTrigger;
+    DamageTrigger bothHandsDamageTrigger;
 
-    [Header("This gameObject must be named 'CombatAgent'. Container gameObjects must be named \n 'mainHandContainer,' 'offHandContainer,' and 'rangedContainer'.")]
     // public MeleeWeapon meleeWeapon;
 
     public bool weaponSheathed = true;
 
-    public int mainHandDamage;
-    public int offHandDamage;
+    public int mainDamage;
+    public int altDamage;
     public int rangedDamage;
 
-    public float mainHandPowerAttackDamageMultiplier;
-    public float offHandPowerAttackDamageMultiplier;
+    public float mainPowerAttackDamageMultiplier;
+    public float altPowerAttackDamageMultiplier;
 
-    public float mainHandCooldownTime;
-    public float offHandCooldownTime;
+    public float mainCooldownTime;
+    public float altCooldownTime;
     public float rangedCooldownTime;
 
-    public float mainHandPowerAttackCooldownMultiplier;
-    public float offHandPowerAttackCooldownMultiplier;
+    public float mainPowerAttackCooldownMultiplier;
+    public float altPowerAttackCooldownMultiplier;
 
     [SerializeField] private TextMeshProUGUI ammunitionDisplay;
 
-    float mainHandRechargedTime = 0;
-    float offHandRechargedTime = 0;
+    float mainRechargedTime = 0;
+    float altRechargedTime = 0;
     float rangedRechargedTime = 0;
 
 
     private PlayerEquipment playerEquipment;
+    private PlayerCharacter playerCharacter;
     ReticleController reticleController;
 
     [SerializeField] float ammunitionAppliedForce = 7f;
 
     void Start(){
-        // playerInput = FindObjectOfType<PlayerInput>();
-        // playerEquipment = FindObjectOfType<PlayerEquipment>();
-        // reticleController = FindObjectOfType<ReticleController>();
+
         AssignReferences();
 
         playerInput.actions["Sheathe Weapon"].performed += _ => SheatheUnsheathe();
@@ -62,44 +63,34 @@ public class PlayerCombatAgent : MonoBehaviour
         playerInput.actions["Off-Hand Attack"].performed += _ => M_OffAttack();
         playerInput.actions["Melee Power Attack"].performed += _ => M_MainPowerAtack();
         playerInput.actions["Melee Off-Hand Power Attack"].performed += _ => M_OffPowerAtack();
+
+        // playerInput.actions["Ranged Attack"].started += _ => Debug.Log("ranged attack: started");
+        // playerInput.actions["Ranged Attack"].performed += _ => Debug.Log("ranged attack: performed");
+        // playerInput.actions["Ranged Attack"].canceled += _ => Debug.Log("ranged attack: canceled");
+        // playerInput.actions["Cancel Ranged Attack"].performed += _ => Debug.Log("cancel ranged attack: performed");
         playerInput.actions["Ranged Attack"].started += _ => RangedWeaponFunction(ReadyRangedWeapon);
         playerInput.actions["Ranged Attack"].performed += _ => RangedWeaponFunction(RangedAttack);
         playerInput.actions["Ranged Attack"].canceled += _ => RangedWeaponFunction(CancelRangedAttack);
         playerInput.actions["Cancel Ranged Attack"].performed += _ => RangedWeaponFunction(CancelRangedAttack);
-    
-        // mainHandContainer = transform.Find("mainHandContainer").gameObject;
-        // offHandContainer = transform.Find("offHandContainer").gameObject;
-        // rangedContainer = transform.Find("rangedContainer").gameObject;
 
-        // mainHandAnimator = mainHandContainer.GetComponent<Animator>();
-        // offHandAnimator = offHandContainer.GetComponent<Animator>();
-
-        // rangedAnimator = rangedContainer.GetComponent<Animator>();
 
     }
 
     void AssignReferences(){
         playerInput = FindObjectOfType<PlayerInput>();
         playerEquipment = FindObjectOfType<PlayerEquipment>();
+        playerCharacter = FindObjectOfType<PlayerCharacter>();
         reticleController = FindObjectOfType<ReticleController>();
 
-        mainHandAnimator = mainHandContainer.GetComponent<Animator>();
-        offHandAnimator = offHandContainer.GetComponent<Animator>();
+        rightHandAnimator = rightHandContainer.GetComponent<Animator>();
+        leftHandAnimator = leftHandContainer.GetComponent<Animator>();
+        bothHandsAnimator = bothHandsContainer.GetComponent<Animator>();
         rangedAnimator = rangedContainer.GetComponent<Animator>();
     }
 
 
 
     public void Setup(){
-        // mainHandContainer = transform.Find("mainHandContainer").gameObject;
-        // offHandContainer = transform.Find("offHandContainer").gameObject;
-        // rangedContainer = transform.Find("rangedContainer").gameObject;
-        // ammunitionContainer = transform.Find("ammunitionContainer").gameObject;
-
-        // mainHandAnimator = mainHandContainer.GetComponent<Animator>();
-        // offHandAnimator = offHandContainer.GetComponent<Animator>();
-
-        // rangedAnimator = rangedContainer.GetComponent<Animator>();
 
         AssignReferences();
         
@@ -109,27 +100,13 @@ public class PlayerCombatAgent : MonoBehaviour
             }
         }
 
-
-
-        // mainHandAnimator.SetBool("Sheathed", weaponSheathed);
-        // offHandAnimator.SetBool("Sheathed", weaponSheathed);
-
         UpdateCombatAgentVariables();
         UpdateAnimators();
     }
 
     void OnApplicationQuit(){
-        if(playerEquipment.weaponR){
-            if(playerEquipment.weaponR.meleeWeaponScriptableObject){
-                weaponSheathed = mainHandAnimator.GetBool("Sheathed");
-            }
-            else if(playerEquipment.weaponR.rangedWeaponScriptableObject){
-                weaponSheathed = rangedAnimator.GetBool("Sheathed");
-            }
-        }
         // For some reason, this saves the opposite of the weapon's actual state, hence the '!'
         ES3.Save("meleeWeaponsSheathed", !weaponSheathed);
-        Debug.Log("deleted overwriteSaveData key");
         ES3.DeleteKey("overwriteSaveData");
     }
     
@@ -141,113 +118,195 @@ public class PlayerCombatAgent : MonoBehaviour
     }
 
     public void UpdateCombatAgentVariables(){
-        mainHandDamageTrigger = null;
-        offHandDamageTrigger = null;
+        mainDamageTrigger = null;
+        altDamageTrigger = null;
         
-        mainHandDamageTrigger = mainHandContainer.GetComponentInChildren<DamageTrigger>();
-        offHandDamageTrigger = offHandContainer.GetComponentInChildren<DamageTrigger>();
-        // ammunitionDamageTrigger = ammunitionContainer.GetComponentInChildren<DamageTrigger>();
+        // mainDamageTrigger = rightHandContainer.GetComponentInChildren<DamageTrigger>();
+        // altDamageTrigger = leftHandContainer.GetComponentInChildren<DamageTrigger>();
+        
 
         AssignReferences();
 
-        // playerEquipment = FindObjectOfType<PlayerEquipment>();
-
-        // playerInput = FindObjectOfType<PlayerInput>();
-
-        if(playerEquipment.weaponR){
-            if(mainHandDamageTrigger && playerEquipment.weaponR.meleeWeaponScriptableObject){
-                mainHandDamage = playerEquipment.weaponR.meleeWeaponScriptableObject.baseDamage;
-                mainHandCooldownTime = playerEquipment.weaponR.meleeWeaponScriptableObject.cooldownTime;
-                mainHandPowerAttackDamageMultiplier = playerEquipment.weaponR.meleeWeaponScriptableObject.powerAttackDamageMultiplier;
-                mainHandPowerAttackCooldownMultiplier = playerEquipment.weaponR.meleeWeaponScriptableObject.powerAttackCooldownMultiplier;
-
-                mainHandDamageTrigger.active = false;
-                mainHandDamageTrigger.damageAmount = mainHandDamage;
+#region Assigning DamageTriggers
+        if(playerEquipment.rightHand){
+            if(playerEquipment.rightHand.meleeWeaponScriptableObject){
+                mainDamageTrigger = rightHandContainer.GetComponentInChildren<DamageTrigger>();
+                if(mainDamageTrigger)
+                    mainDamageTrigger.active = false;
             }
-            else if(playerEquipment.weaponR.rangedWeaponScriptableObject){
-                rangedDamage = playerEquipment.weaponR.rangedWeaponScriptableObject.baseDamage;
-                rangedCooldownTime = playerEquipment.weaponR.rangedWeaponScriptableObject.cooldownTime;
 
-                float drawTime = playerEquipment.weaponR.rangedWeaponScriptableObject.drawTime;
+            if(playerEquipment.leftHand){
+                if(playerEquipment.leftHand.meleeWeaponScriptableObject){
+                    altDamageTrigger = leftHandContainer.GetComponentInChildren<DamageTrigger>();
+                    if(altDamageTrigger)
+                        altDamageTrigger.active = false;
+                }
+            }
+        }
+        else if(playerEquipment.bothHands){
+            if(playerEquipment.bothHands.meleeWeaponScriptableObject){
+                mainDamageTrigger = bothHandsContainer.GetComponentInChildren<DamageTrigger>();
+                mainDamageTrigger.active = false;
+            }
+        }
+    #endregion
+#region Assigning Variables
+        if(playerEquipment.rightHand){
+            if(mainDamageTrigger && playerEquipment.rightHand.meleeWeaponScriptableObject){
+                mainDamage = playerEquipment.rightHand.meleeWeaponScriptableObject.baseDamage;
+                mainCooldownTime = playerEquipment.rightHand.meleeWeaponScriptableObject.cooldownTime;
+                mainPowerAttackDamageMultiplier = playerEquipment.rightHand.meleeWeaponScriptableObject.powerAttackDamageMultiplier;
+                mainPowerAttackCooldownMultiplier = playerEquipment.rightHand.meleeWeaponScriptableObject.powerAttackCooldownMultiplier;
+
+                // mainDamageTrigger.active = false;
+                mainDamageTrigger.damageAmount = mainDamage;
+            }
+            else if(playerEquipment.rightHand.rangedWeaponScriptableObject){
+                rangedDamage = playerEquipment.rightHand.rangedWeaponScriptableObject.baseDamage;
+                rangedCooldownTime = playerEquipment.rightHand.rangedWeaponScriptableObject.cooldownTime;
+
+                float drawTime = playerEquipment.rightHand.rangedWeaponScriptableObject.drawTime;
 
             }
 
         }
+        else if(playerEquipment.bothHands){
+            if(mainDamageTrigger && playerEquipment.bothHands.meleeWeaponScriptableObject){
+                mainDamage = playerEquipment.bothHands.meleeWeaponScriptableObject.baseDamage;
+                mainCooldownTime = playerEquipment.bothHands.meleeWeaponScriptableObject.cooldownTime;
+                mainPowerAttackDamageMultiplier = playerEquipment.bothHands.meleeWeaponScriptableObject.powerAttackDamageMultiplier;
+                mainPowerAttackCooldownMultiplier = playerEquipment.bothHands.meleeWeaponScriptableObject.powerAttackCooldownMultiplier;
 
-        if(offHandDamageTrigger && playerEquipment.weaponL){
+                // mainDamageTrigger.active = false;
+                mainDamageTrigger.damageAmount = mainDamage;
+            }
+            else if(playerEquipment.bothHands.rangedWeaponScriptableObject){
+                rangedDamage = playerEquipment.bothHands.rangedWeaponScriptableObject.baseDamage;
+                rangedCooldownTime = playerEquipment.bothHands.rangedWeaponScriptableObject.cooldownTime;
 
-            offHandDamage = playerEquipment.weaponL.meleeWeaponScriptableObject.baseDamage;
-            offHandCooldownTime = playerEquipment.weaponL.meleeWeaponScriptableObject.cooldownTime;
-            offHandPowerAttackDamageMultiplier = playerEquipment.weaponL.meleeWeaponScriptableObject.powerAttackDamageMultiplier;
-            offHandPowerAttackCooldownMultiplier = playerEquipment.weaponL.meleeWeaponScriptableObject.powerAttackCooldownMultiplier;
+                float drawTime = playerEquipment.bothHands.rangedWeaponScriptableObject.drawTime;
+
+            }
+        }
+
+        if(altDamageTrigger && playerEquipment.leftHand){
+
+            altDamage = playerEquipment.leftHand.meleeWeaponScriptableObject.baseDamage;
+            altCooldownTime = playerEquipment.leftHand.meleeWeaponScriptableObject.cooldownTime;
+            altPowerAttackDamageMultiplier = playerEquipment.leftHand.meleeWeaponScriptableObject.powerAttackDamageMultiplier;
+            altPowerAttackCooldownMultiplier = playerEquipment.leftHand.meleeWeaponScriptableObject.powerAttackCooldownMultiplier;
             
-            offHandDamageTrigger.active = false;
-            offHandDamageTrigger.damageAmount = offHandDamage;
+            // altDamageTrigger.active = false;
+            altDamageTrigger.damageAmount = altDamage;
         }
 
-        // mainHandAnimator = mainHandContainer.GetComponent<Animator>();
-        // offHandAnimator = offHandContainer.GetComponent<Animator>();
-        // rangedAnimator = rangedContainer.GetComponent<Animator>();
+    #endregion
 
     }
 
+// TODO finish implementing two handed weapons with PCA
     public void RepairCombatAgentAfterMenuClose(){
         UpdateAnimators();
         CancelRangedAttack();
     }
 
     public void UpdateAnimators(){
-        // One handed weapon in main hand
-        if(playerEquipment.weaponR && !playerEquipment.weaponR.twoHanded && !playerEquipment.weaponL){
-            SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, weaponSheathed, true);
-            ammunitionDisplay.gameObject.SetActive(false);
+        Item emptyHand = playerCharacter.unarmedStrike;
+
+        if(!playerEquipment.bothHands){
+            // Single one handed weapon in right hand
+            if(playerEquipment.leftHand == emptyHand && playerEquipment.rightHand != emptyHand){
+                // Debug.Log(weaponSheathed);
+                SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, true, true, true, true);
+            }
+            // Dual wielding
+            else if(playerEquipment.leftHand != emptyHand && playerEquipment.leftHand.type == Item.ItemType.Weapon){
+                SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, weaponSheathed, true, true, true);
+            }
+            // Shield in left hand, one handed weapon in right hand
+            else if(playerEquipment.leftHand.type == Item.ItemType.Shield){
+                SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, weaponSheathed, weaponSheathed, true, true);
+            }
+            // Empty handed
+            else if(playerEquipment.leftHand == emptyHand && playerEquipment.rightHand == emptyHand){
+
+                SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, weaponSheathed, true, true, true);
+            }
         }
-        // Dual wielding
-        else if(playerEquipment.weaponR && playerEquipment.weaponL){
-            SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, weaponSheathed, true);
-            ammunitionDisplay.gameObject.SetActive(false);
-        }
-        else if(playerEquipment.weaponR && playerEquipment.weaponR.twoHanded){
+        else{
             // Two handed melee weapon
-            if(playerEquipment.weaponR.meleeWeaponScriptableObject){
-                SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, true, true);
-                ammunitionDisplay.gameObject.SetActive(false);
+            if(playerEquipment.bothHands.meleeWeaponScriptableObject){
+                SetAnimatorsSheathedParameterAndInputAction(true, true, true, weaponSheathed, true);
             }
             // Ranged weapon
-            else{
-                SetAnimatorsSheathedParameterAndInputAction(true, true, weaponSheathed);
-                Debug.Log("Time: " + Time.time + "; preparing to set ammunitionDisplay visibility to: " + !weaponSheathed);
-                ammunitionDisplay.gameObject.SetActive(!weaponSheathed);
-                Debug.Log("Time: " + Time.time + "; ammunitionDisplay visibility: " + !weaponSheathed);
-
-                // This didn't work :/
-                // if(ammunitionContainer.transform.childCount != 0)
-                //     rangedAnimator.SetTrigger("Cancel");
+            else if(playerEquipment.bothHands.rangedWeaponScriptableObject){
+                SetAnimatorsSheathedParameterAndInputAction(true, true, true, true, weaponSheathed);
             }
         }
-        // Fists
-        else{
-            SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, weaponSheathed, true);
-            ammunitionDisplay.gameObject.SetActive(false);
-        }
+        
+        #region old code
+        // // Dual wielding
+        // if(playerEquipment.rightHand && playerEquipment.leftHand != FindObjectOfType<PlayerCharacter>().unarmedStrike){
+        //     SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, weaponSheathed, true, true);
+        //     ammunitionDisplay.gameObject.SetActive(false);
+        // }
+        // // Single one handed weapon being wielded in the main hand
+        // else if(playerEquipment.rightHand && playerEquipment.leftHand == FindObjectOfType<PlayerCharacter>().unarmedStrike){
+        //     SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, true, true, true);
+        //     ammunitionDisplay.gameObject.SetActive(false);
+        // }
+        // else if(playerEquipment.rightHand && playerEquipment.rightHand.twoHanded){
+        //     // Two handed melee weapon
+        //     if(playerEquipment.rightHand.meleeWeaponScriptableObject){
+        //         SetAnimatorsSheathedParameterAndInputAction(true, true, false, true);
+        //         ammunitionDisplay.gameObject.SetActive(false);
+        //     }
+        //     // Ranged weapon
+        //     else{
+        //         SetAnimatorsSheathedParameterAndInputAction(true, true, true, weaponSheathed);
+        //         Debug.Log("Time: " + Time.time + "; preparing to set ammunitionDisplay visibility to: " + !weaponSheathed);
+        //         ammunitionDisplay.gameObject.SetActive(!weaponSheathed);
+        //         Debug.Log("Time: " + Time.time + "; ammunitionDisplay visibility: " + !weaponSheathed);
 
+        //     }
+        // }
+        // // Fists
+        // else{
+        //     SetAnimatorsSheathedParameterAndInputAction(weaponSheathed, weaponSheathed, true, true);
+        //     ammunitionDisplay.gameObject.SetActive(false);
+        // }
+#endregion
         UpdateAmmunitionDisplay();
     }
 
     public void UpdateAmmunitionDisplay(){
-        if(ammunitionDisplay.gameObject.activeSelf){
-            // Also display count
-            if(playerEquipment.ammunition){
-                ammunitionDisplay.SetText(playerEquipment.ammunition.itemName + " ("+ FindObjectOfType<PlayerInventory>().ReturnItemCount(playerEquipment.ammunition) + ")");
+        if(playerEquipment.bothHands){
+            if(playerEquipment.bothHands.rangedWeaponScriptableObject){
+                if(weaponSheathed){
+                    ammunitionDisplay.gameObject.SetActive(false);
+                }
+                else{
+                    // Also display count
+                    if(playerEquipment.ammunition){
+                        ammunitionDisplay.SetText(playerEquipment.ammunition.itemName + " ("+ FindObjectOfType<PlayerInventory>().ReturnItemCount(playerEquipment.ammunition) + ")");
+                    }
+                    else{
+                        ammunitionDisplay.SetText("No ammunition equipped");
+                    }
+            
+                    ammunitionDisplay.gameObject.SetActive(true);
+                }
             }
-            else
-                ammunitionDisplay.SetText("No ammunition equipped");
         }
-    }
 
-    void SetAnimatorsSheathedParameterAndInputAction(bool m, bool o, bool r){
-        mainHandAnimator.SetBool("Sheathed", m);
-        offHandAnimator.SetBool("Sheathed", o);
+    }
+// Shield boolean may prove unnecessary, it currently isn't referenced anywhere
+// May be able to consolidate the functionality of the twohanded boolean into the right hand bool as well
+// since all the processing is going to be done in the attack functions
+    void SetAnimatorsSheathedParameterAndInputAction(bool m, bool o, bool s, bool t, bool r){
+        rightHandAnimator.SetBool("Sheathed", m);
+        leftHandAnimator.SetBool("Sheathed", o);
+        bothHandsAnimator.SetBool("Sheathed", t);
         rangedAnimator.SetBool("Sheathed", r);
 
         playerInput = FindObjectOfType<PlayerInput>();
@@ -261,19 +320,20 @@ public class PlayerCombatAgent : MonoBehaviour
 
         playerInput.actions["Sheathe Weapon"].Enable();
 
-        if(!m){
+        if(!m || !t){
             playerInput.actions["Attack"].Enable();
             playerInput.actions["Melee Power Attack"].Enable();
-            playerInput.actions["Sheathe Weapon"].Enable();
         }
         if(!o){
+            // TODO have the off hand attack functions check to see whether left hand is holding shield and do either weapon
+            // or shield actions accordingly
             playerInput.actions["Off-Hand Attack"].Enable();
             playerInput.actions["Melee Off-Hand Power Attack"].Enable();
         }
         if(!r){
             playerInput.actions["Ranged Attack"].Enable();
         }
-
+#region Debugging messages
         // Debug.Log("rangedAttack interactions: " + FindObjectOfType<PlayerInput>().actions["Ranged Attack"].bindings[0].effectiveInteractions);
 
         // Debug.Log("Input actions statuses");
@@ -281,7 +341,8 @@ public class PlayerCombatAgent : MonoBehaviour
         // Debug.Log("Melee Power Attack: " + playerInput.actions["Melee Power Attack"].enabled);
         // Debug.Log("Off-Hand Attack: " + playerInput.actions["Off-Hand Attack"].enabled);
         // Debug.Log("Melee Off-Hand Power Attack: " + playerInput.actions["Melee Off-Hand Power Attack"].enabled);
-        // Debug.Log("Ranged Attack: " + playerInput.actions["Ranged Attack"].enabled);
+        // Debug.Log("sheathe status: " + playerInput.actions["Sheathe Weapon"].enabled);
+    #endregion
     }
 
     void RangedWeaponFunction(System.Action function){
@@ -305,12 +366,11 @@ public class PlayerCombatAgent : MonoBehaviour
         // Don't know if this fixes it because I can't reproduce the issue, but if it comes up again then I guess this fix doesn't cut it
         if(playerEquipment.ammunition && ammunitionContainer.transform.childCount == 0 && FindObjectOfType<PlayerInventory>().ReturnItemCount(playerEquipment.ammunition) > 0){
             
-            // Debug.Log("Readying ranged weapon; ammunitionContainer childCount: " + ammunitionContainer.transform.childCount);
 
             playerInput.actions["Cancel Ranged Attack"].Enable();
             playerInput.actions["Sheathe Weapon"].Disable();
 
-            rangedAnimator.speed = readyRangedWeaponAnimationClip.length / playerEquipment.weaponR.rangedWeaponScriptableObject.drawTime;
+            rangedAnimator.speed = readyRangedWeaponAnimationClip.length / playerEquipment.bothHands.rangedWeaponScriptableObject.drawTime;
             rangedAnimator.SetBool("Fire", false);
             rangedAnimator.SetBool("Cancel", false);
             rangedAnimator.SetBool("Ready", true);
@@ -327,7 +387,7 @@ public class PlayerCombatAgent : MonoBehaviour
 
     void CancelRangedAttack(){
         if(ammunitionContainer.transform.childCount != 0){
-            Debug.Log("Canceled ranged attack");
+            // Debug.Log("Canceled ranged attack");
             rangedAnimator.speed = 1;
             // rangedAnimator.SetTrigger("Cancel");
             rangedAnimator.SetBool("Cancel", true);
@@ -341,10 +401,11 @@ public class PlayerCombatAgent : MonoBehaviour
             }
         }
     }
-
+// FIXME ranged attacks when reloading game cause arrow to instantly spawn with colliders enabled and pickup disabled
+// maybe input actions are being called out of order because some are enabled when they shouldn't be?
     void RangedAttack(){
         if(ammunitionContainer.transform.childCount != 0){
-            Debug.Log("Ranged attack! interactions: " + FindObjectOfType<PlayerInput>().actions["Ranged Attack"].bindings[0].effectiveInteractions);
+            // Debug.Log("Ranged attack! interactions: " + FindObjectOfType<PlayerInput>().actions["Ranged Attack"].bindings[0].effectiveInteractions);
             rangedAnimator.speed = 1;
             // rangedAnimator.SetTrigger("Fire");
             rangedAnimator.SetBool("Fire", true);
@@ -400,90 +461,118 @@ public class PlayerCombatAgent : MonoBehaviour
 
     public void M_MainAttack(){
         
-        if(!mainHandDamageTrigger){
+        if(!mainDamageTrigger){
             UpdateCombatAgentVariables();
+        }
+
+        Animator anim;
+
+        if(playerEquipment.rightHand){
+            anim = rightHandAnimator;
+        }
+        else if(playerEquipment.bothHands){
+            anim = bothHandsAnimator;
+        }
+        else{
+            return;
         }
         
         // Animate melee strike
-        if(!weaponSheathed && Time.time >= mainHandRechargedTime && !Pause.PauseManagement.paused && playerEquipment.weaponR){
-            mainHandDamageTrigger.damageAmount = mainHandDamage;
+        if(!weaponSheathed && Time.time >= mainRechargedTime && !Pause.PauseManagement.paused){
+            
+            mainDamageTrigger.damageAmount = mainDamage;
 
-            mainHandAnimator.SetTrigger("Attack");
-            mainHandAnimator.SetBool("Attacking", true);
+            anim.SetTrigger("Attack");
+            anim.SetBool("Attacking", true);
 
-            mainHandRechargedTime = Time.time + mainHandCooldownTime;
-            offHandRechargedTime = Time.time + mainHandCooldownTime;
+            mainRechargedTime = Time.time + mainCooldownTime;
+            altRechargedTime = Time.time + mainCooldownTime;
 
             reticleController.SetReticle((int)ReticleController.Reticle.X);
 
             // Activate damage trigger
-            StartCoroutine(SetDamageTrigger(mainHandAnimator, mainHandDamageTrigger));
+            StartCoroutine(SetDamageTrigger(anim, mainDamageTrigger));
+
         }
 
     }
 
     public void M_OffAttack(){
-        if(!offHandDamageTrigger){
+        if(!altDamageTrigger){
             UpdateCombatAgentVariables();
         }
 
+
+
         // This is checking for both main and off hand weapons to be present in preparation for the future introduction of hand to hand combat 
         // where if there isn't a weapon in either hand, the off hand attack will still go through
-        if(!weaponSheathed && Time.time >= offHandRechargedTime && !Pause.PauseManagement.paused && playerEquipment.weaponL && playerEquipment.weaponR){
-            offHandDamageTrigger.damageAmount = offHandDamage;
+        if(!weaponSheathed && Time.time >= altRechargedTime && !Pause.PauseManagement.paused && playerEquipment.leftHand && playerEquipment.rightHand){
+            altDamageTrigger.damageAmount = altDamage;
 
-            offHandAnimator.SetTrigger("Attack");
-            offHandAnimator.SetBool("Attacking", true);
+            leftHandAnimator.SetTrigger("Attack");
+            leftHandAnimator.SetBool("Attacking", true);
 
-            offHandRechargedTime = Time.time + offHandCooldownTime;
-            mainHandRechargedTime = Time.time + offHandCooldownTime;
+            altRechargedTime = Time.time + altCooldownTime;
+            mainRechargedTime = Time.time + altCooldownTime;
 
             reticleController.SetReticle((int)ReticleController.Reticle.X);
 
             // Activate damage trigger
-            StartCoroutine(SetDamageTrigger(offHandAnimator, offHandDamageTrigger));
+            StartCoroutine(SetDamageTrigger(leftHandAnimator, altDamageTrigger));
         }
     }
 
     public void M_MainPowerAtack(){
-        if(!mainHandDamageTrigger){
+        if(!mainDamageTrigger){
             UpdateCombatAgentVariables();
         }
 
+        Animator anim;
+
+        if(playerEquipment.rightHand){
+            anim = rightHandAnimator;
+        }
+        else if(playerEquipment.bothHands){
+            anim = bothHandsAnimator;
+        }
+        else{
+            return;
+        }
+
         // Animate melee strike
-        if(!weaponSheathed && Time.time >= mainHandRechargedTime && !Pause.PauseManagement.paused){
-            mainHandDamageTrigger.damageAmount = Mathf.RoundToInt(mainHandDamage * mainHandPowerAttackDamageMultiplier);
+        if(!weaponSheathed && Time.time >= mainRechargedTime && !Pause.PauseManagement.paused){
+            mainDamageTrigger.damageAmount = Mathf.RoundToInt(mainDamage * mainPowerAttackDamageMultiplier);
 
-            mainHandAnimator.SetTrigger("Power Attack");
-            mainHandAnimator.SetBool("Attacking", true);
+            anim.SetTrigger("Power Attack");
+            anim.SetBool("Attacking", true);
 
-            mainHandRechargedTime = Time.time + mainHandCooldownTime * mainHandPowerAttackCooldownMultiplier;
-            offHandRechargedTime = Time.time + mainHandCooldownTime * mainHandPowerAttackCooldownMultiplier;
+            mainRechargedTime = Time.time + mainCooldownTime * mainPowerAttackCooldownMultiplier;
+            altRechargedTime = Time.time + mainCooldownTime * mainPowerAttackCooldownMultiplier;
 
             reticleController.SetReticle((int)ReticleController.Reticle.X);
             // Activate damage trigger
-            StartCoroutine(SetDamageTrigger(mainHandAnimator, mainHandDamageTrigger));
+            StartCoroutine(SetDamageTrigger(anim, mainDamageTrigger));
         }
     }
 
     public void M_OffPowerAtack(){
-        if(!offHandDamageTrigger){
+        if(!altDamageTrigger){
             UpdateCombatAgentVariables();
         }
 
         // Animate melee strike
-        if(!weaponSheathed && Time.time >= offHandRechargedTime && !Pause.PauseManagement.paused && playerEquipment.weaponL && playerEquipment.weaponR){
-            offHandDamageTrigger.damageAmount = Mathf.RoundToInt(offHandDamage * offHandPowerAttackDamageMultiplier);
+        if(!weaponSheathed && Time.time >= altRechargedTime && !Pause.PauseManagement.paused && playerEquipment.leftHand && playerEquipment.rightHand){
+            altDamageTrigger.damageAmount = Mathf.RoundToInt(altDamage * altPowerAttackDamageMultiplier);
 
-            offHandAnimator.SetTrigger("Power Attack");
-            offHandAnimator.SetBool("Attacking", true);
+            leftHandAnimator.SetTrigger("Power Attack");
+            leftHandAnimator.SetBool("Attacking", true);
 
-            offHandRechargedTime = Time.time + offHandCooldownTime * offHandPowerAttackCooldownMultiplier;
-            mainHandRechargedTime = Time.time + offHandCooldownTime * offHandPowerAttackCooldownMultiplier;
+            altRechargedTime = Time.time + altCooldownTime * altPowerAttackCooldownMultiplier;
+            mainRechargedTime = Time.time + altCooldownTime * altPowerAttackCooldownMultiplier;
 
             reticleController.SetReticle((int)ReticleController.Reticle.X);
             // Activate damage trigger
-            StartCoroutine(SetDamageTrigger(offHandAnimator, offHandDamageTrigger));
+            StartCoroutine(SetDamageTrigger(leftHandAnimator, altDamageTrigger));
         }
     }
 
@@ -496,11 +585,11 @@ public class PlayerCombatAgent : MonoBehaviour
 
     IEnumerator ManageCooldown(Animator anim){
         anim.SetBool("On Cooldown", true);
-        if(anim == mainHandAnimator){
-            yield return new WaitUntil(() => Time.time >= mainHandRechargedTime);
+        if(anim == rightHandAnimator || anim == bothHandsAnimator){
+            yield return new WaitUntil(() => Time.time >= mainRechargedTime);
         }
-        else if(anim == offHandAnimator){
-            yield return new WaitUntil(() => Time.time >= offHandRechargedTime);
+        else if(anim == leftHandAnimator){
+            yield return new WaitUntil(() => Time.time >= altRechargedTime);
         }
         else if(anim == rangedAnimator){
             yield return new WaitUntil(() => Time.time >= rangedRechargedTime);

@@ -13,24 +13,24 @@ public class ShieldEquipper : MonoBehaviour, IEquipper
         pE = FindObjectOfType<PlayerEquipment>();
         item = inventoryItemClass.sObj;
 
-        if(pE.weaponL){
+        if(pE.leftHand){
             // Replace or cancel?
             replaceOffHandPopup.SetActive(true);
         }
         else{
-            pE.EquipSlot(out pE.weaponL, item);
+            pE.EquipSlot(out pE.leftHand, item);
         }
     }
 
     public void ConfirmReplaceOffHand(){
-        pE.UnequipSlot(ref pE.weaponL);
-        pE.EquipSlot(out pE.weaponL, item);
+        pE.UnequipSlot(ref pE.leftHand);
+        pE.EquipSlot(out pE.leftHand, item);
     }
 
     public void UnequipItem(PlayerInventory.InventoryItem inventoryItemClass){
         pE = FindObjectOfType<PlayerEquipment>();
         item = inventoryItemClass.sObj;
 
-        pE.UnequipSlot(ref pE.weaponL);
+        pE.UnequipSlot(ref pE.leftHand);
     }
 }

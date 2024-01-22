@@ -299,9 +299,10 @@ public class ControlsManager : MonoBehaviour
             playerInputComponent.actions.LoadBindingOverridesFromJson(rebinds);
 
 
-            if(FindObjectOfType<PlayerEquipment>().weaponR){
-                if(FindObjectOfType<PlayerEquipment>().weaponR.rangedWeaponScriptableObject){
-                    float drawTime = FindObjectOfType<PlayerEquipment>().weaponR.rangedWeaponScriptableObject.drawTime;
+            if(FindObjectOfType<PlayerEquipment>().bothHands){
+                if(FindObjectOfType<PlayerEquipment>().bothHands.rangedWeaponScriptableObject){
+                    float drawTime = FindObjectOfType<PlayerEquipment>().bothHands.rangedWeaponScriptableObject.drawTime;
+                    Debug.Log(drawTime);
                     
                     InputAction rangedAttackAction = FindObjectOfType<PlayerInput>().actions["Ranged Attack"];
 

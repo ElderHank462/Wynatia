@@ -5,7 +5,7 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Inventory Item")]
 public class Item : ScriptableObject
 {
-    
+
     public enum ItemType{
         Currency,
         Trinket,
@@ -24,7 +24,7 @@ public class Item : ScriptableObject
         // Any size, can be thrown or shot out of a cannon, catapult, trebuchet, etc.
         Projectile,
         Shield,
-        MagicWeapon,
+        // MagicWeapon,
         Clothing,
         MagicClothing,
         Headwear,
@@ -44,6 +44,7 @@ public class Item : ScriptableObject
     public int itemLevel;
     public int value = 0;
     public GameObject worldObject;
+
 
 
     #region Weapon Paramaters

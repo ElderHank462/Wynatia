@@ -14,6 +14,9 @@ public class PlayerCharacter : MonoBehaviour
 
     public FloatingHealthBar healthBar;
 
+// Intended to be equipped whenever melee weapons are unequipped; for monk characters this scriptable object could change over time, too
+    public Item unarmedStrike;
+
     
     void Start(){
         healthBar.SetHealth(currentHealth, maxHealth);

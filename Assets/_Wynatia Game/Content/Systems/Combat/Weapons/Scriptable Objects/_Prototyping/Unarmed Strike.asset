@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c05187cf666b548f8a82dc4f9ab47d8e, type: 3}
-  m_Name: Prototyping Sword
+  m_Name: Unarmed Strike
   m_EditorClassIdentifier: 
-  weaponName: Prototyping Sword
-  baseDamage: 5
-  weight: 4
-  sharpness: 10
-  cooldownTime: 1
+  weaponName: Unarmed Strike
+  baseDamage: 1
+  weight: 0
+  sharpness: 0
+  cooldownTime: 0.5
   powerAttackDamageMultiplier: 2
   powerAttackCooldownMultiplier: 2
-  traits: 000000000000000000000000
+  traits: 
