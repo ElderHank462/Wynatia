@@ -298,6 +298,9 @@ public class PlayerCombatAgent : MonoBehaviour
                 }
             }
         }
+        else{
+            ammunitionDisplay.gameObject.SetActive(false);
+        }
 
     }
 // Shield boolean may prove unnecessary, it currently isn't referenced anywhere

@@ -44,6 +44,7 @@ public class Item : ScriptableObject
     public int itemLevel;
     public int value = 0;
     public GameObject worldObject;
+    public string description;
 
 
 

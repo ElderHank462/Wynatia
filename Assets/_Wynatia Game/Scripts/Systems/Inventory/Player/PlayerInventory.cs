@@ -8,6 +8,8 @@ using UnityEngine.UI;
 
 public class PlayerInventory : MonoBehaviour
 {
+    #region Classes, Enums, and Structs
+
     [System.Serializable]
     public class InventoryItem{
         public Item sObj;
@@ -28,52 +30,49 @@ public class PlayerInventory : MonoBehaviour
         West,
         None
     }
+
+    #endregion
     
+#region Script References
+[Header("Script References")]
     [SerializeField]
     List<InventoryItem> playerInventory = new List<InventoryItem>();
+    public ItemActionsMenu itemActionsMenu;
+    public ItemInspector itemInspector;
+    public DropItemMenu dropItemMenu;
+    public ItemInfoPanel itemInfo;
+#endregion
 
+#region  Component References
+[Header("Component References")]
+    PlayerInput playerInput;
+
+#endregion
+
+#region Transforms and GameObjects
+[Header("Transforms and GameObjects")]
     public GameObject inventoryItemUIButton;
     public GameObject inventoryWindow;
     public Transform playerInventoryContent;
-    public ItemActionsMenu itemActionsMenu;
-    public DropItemMenu dropItemMenu;
-    public ItemInspector itemInspector;
     public GameObject dropItemWarningPopup;
     public GameObject pickupPopup;
-    public TextMeshProUGUI pickupBindingText;
-    public TextMeshProUGUI pickupItemText;
-
-    public float dropItemDistance = 1.5f;
-    public float dropItemInterval = 0.2f;
-    public float pickupItemDistance = 2.25f;
-    public LayerMask worldItemLayerMask;
     public GameObject gearWheel;
     public GameObject assignGearWheel;
-
-    private InventoryItem selectedItem;
-    [SerializeField]
-    private List<Item> equippedItems = new List<Item>();
     private Transform playerCamera;
+    [SerializeField] Transform northItemRoom;
+    [SerializeField] Transform eastItemRoom;
+    [SerializeField] Transform southItemRoom;
+    [SerializeField] Transform westItemRoom;
+
+    public RectTransform debugArrow;
     private List<GameObject> worldItemsToInstantiate = new List<GameObject>();
-    private Vector3 dropPoint;
-    private List<WorldItem> worldItemsInRange = new List<WorldItem>();
-    private WorldItem hoveredItem;
-    PlayerInput playerInput;
-    private float previousTimeScale = 1;
-    private int northSelectedIndex = 0;
-    private int eastSelectedIndex = 0;
-    private int southSelectedIndex = 0;
-    private int westSelectedIndex = 0;
-    private List<InventoryItem> northItems = new List<InventoryItem>();
-    private List<InventoryItem> eastItems = new List<InventoryItem>();
-    private List<InventoryItem> southItems = new List<InventoryItem>();
-    private List<InventoryItem> westItems = new List<InventoryItem>();
-    [SerializeField] List<Button> gearWheelAssignButtons = new List<Button>();
-    [SerializeField] List<Toggle> gearWheelSegments = new List<Toggle>();
+    
+#endregion
 
-    GearWheelSegment selectedSegment = GearWheelSegment.None;
-
-
+#region Text and other UI Objects
+[Header("Text and other UI Objects")]
+    public TextMeshProUGUI pickupBindingText;
+    public TextMeshProUGUI pickupItemText;
     [Tooltip("Element 0: gear wheel text, Element 1: assignment gear wheel text, Element 2: segment item count text, Element 3: assign item count text")]
     [SerializeField] List<TextMeshProUGUI> northItemTextObjects = new List<TextMeshProUGUI>();
     // [SerializeField] TextMeshProUGUI northItemText;
@@ -84,14 +83,48 @@ public class PlayerInventory : MonoBehaviour
     [SerializeField] TextMeshProUGUI eastItemAssignText;
     [SerializeField] TextMeshProUGUI southItemAssignText;
     [SerializeField] TextMeshProUGUI westItemAssignText;
-    [SerializeField] Transform northItemRoom;
-    [SerializeField] Transform eastItemRoom;
-    [SerializeField] Transform southItemRoom;
-    [SerializeField] Transform westItemRoom;
+    [SerializeField] List<Button> gearWheelAssignButtons = new List<Button>();
+    [SerializeField] List<Toggle> gearWheelSegments = new List<Toggle>();
 
-    public RectTransform debugArrow;
+#endregion
+
+#region  Simple Types
+[Header("Simple Types")]
+    public float dropItemDistance = 1.5f;
+    public float dropItemInterval = 0.2f;
+    public float pickupItemDistance = 2.25f;
+    public int playerCurrency = 0;
+    private float previousTimeScale = 1;
+    [SerializeField] private int northSelectedIndex = 0;
+    private int eastSelectedIndex = 0;
+    private int southSelectedIndex = 0;
+    private int westSelectedIndex = 0;
+    private Vector3 dropPoint;
     private Vector2 mousePosition = new Vector2();
+    
 
+#endregion
+
+#region Items, WorldItems and InventoryItems
+[Header("Items, WorldItems, and InventoryItems")]
+    private InventoryItem selectedItem;
+    [SerializeField]
+    private List<Item> equippedItems = new List<Item>();
+    private List<WorldItem> worldItemsInRange = new List<WorldItem>();
+    private WorldItem hoveredItem;
+    [SerializeField] private List<InventoryItem> northItems = new List<InventoryItem>();
+    private List<InventoryItem> eastItems = new List<InventoryItem>();
+    private List<InventoryItem> southItems = new List<InventoryItem>();
+    private List<InventoryItem> westItems = new List<InventoryItem>();
+
+#endregion
+
+#region Other Variables
+[Header("Other Variables")]
+    public LayerMask worldItemLayerMask;
+    GearWheelSegment selectedSegment = GearWheelSegment.None;
+
+#endregion
 
 
     void Start(){       
@@ -125,8 +158,12 @@ public class PlayerInventory : MonoBehaviour
                         Debug.LogError("Collider player inventory raycasted for is too deeply nested in the item's GameObject.");
                     }
                 }
-
-                pickupItemText.SetText(hoveredItem.scriptableObject.itemName);
+                if(hoveredItem.quantity > 1){
+                    pickupItemText.SetText(hoveredItem.scriptableObject.itemName + "(" + hoveredItem.quantity + ")");
+                }
+                else{
+                    pickupItemText.SetText(hoveredItem.scriptableObject.itemName);
+                }
                 pickupBindingText.SetText(GetComponent<PlayerInput>().currentActionMap.FindAction("Interact").GetBindingDisplayString());
                 pickupPopup.SetActive(true);
             }
@@ -193,6 +230,8 @@ public class PlayerInventory : MonoBehaviour
         FindObjectOfType<PlayerCombatAgent>().UpdateCombatAgentVariables();
         FindObjectOfType<PlayerCombatAgent>().RepairCombatAgentAfterMenuClose();
     }
+
+    #region Gear Wheel
 
     void CheckWhichWheelIsOpen(){
         if(gearWheel.activeSelf){
@@ -394,6 +433,7 @@ public class PlayerInventory : MonoBehaviour
         InputAction action = playerInput.actions["Change Gear Wheel Item"];
         
         float scroll = action.ReadValue<Vector2>().y;
+        // Debug.Log(scroll);
 
         if(scroll > 0){
             // Next item
@@ -432,7 +472,7 @@ public class PlayerInventory : MonoBehaviour
     }
 
     int IncrementSegmentSelectedIndex(List<InventoryItem> segmentList, int i, int inc){
-        i++;
+        i += inc;
 
         // If outside bounds, carry over
         if(i >= segmentList.Count){
@@ -474,6 +514,7 @@ public class PlayerInventory : MonoBehaviour
 
         playerInput.actions["Inventory"].Enable();
         playerInput.actions["menu"].Enable();
+        
 
         // Disable cancel gear wheel
         playerInput.actions["Cancel Gear Wheel"].Disable();
@@ -485,19 +526,12 @@ public class PlayerInventory : MonoBehaviour
         // Return time to what it was before opening the gear wheel
         Time.timeScale = previousTimeScale;
         // Enable pause action, other menu actions
-        // if(!inventoryWindow.activeSelf){
-            playerInput.actions["Sheathe Weapon"].Enable();
-            playerInput.actions["Attack"].Enable();
-            playerInput.actions["Off-Hand Attack"].Enable();
-            playerInput.actions["Interact"].Enable();
-            playerInput.actions["Melee Power Attack"].Enable();
-            playerInput.actions["Melee Off-Hand Power Attack"].Enable();
-            playerInput.actions["Ranged Attack"].Enable();
-            playerInput.actions["Cancel Ranged Attack"].Enable();
-            playerInput.actions["look"].Enable();
-        // }
+
+        playerInput.actions["Sheathe Weapon"].Enable();
+        playerInput.actions["look"].Enable();
         playerInput.actions["Inventory"].Enable();
         playerInput.actions["menu"].Enable();
+    playerInput.actions["Interact"].Enable();
 
         // Disable cancel gear wheel
         playerInput.actions["Cancel Gear Wheel"].Disable();
@@ -506,15 +540,21 @@ public class PlayerInventory : MonoBehaviour
         // Equip/use item
         if(gearWheelSegment == GearWheelSegment.North){
             // Pass northItems[northSelectedIndex] into function that will detect item's type and call appropriate function (equip, consume, use, etc.)
-            DetectItemTypeAndPerformUseAction(northItems[northSelectedIndex]);
+            if(northItems.Count != 0)
+                DetectItemTypeAndPerformUseAction(northItems[northSelectedIndex]);
         }
         if(gearWheelSegment == GearWheelSegment.None){
             selectedSegment = GearWheelSegment.None;
         }
 
+        FindObjectOfType<PlayerCombatAgent>().UpdateAnimators();
+
     }
 
     void DetectItemTypeAndPerformUseAction(InventoryItem itemToUse){
+        if(itemToUse == null)
+            return;
+        
         // Consumable
         if(itemToUse.sObj.type == Item.ItemType.Potion ||
            itemToUse.sObj.type == Item.ItemType.Food)
@@ -526,12 +566,20 @@ public class PlayerInventory : MonoBehaviour
                 ) // || itemToUse.sObj.type == Item.ItemType.MagicWeapon
         {
             // Time to overhaul the equipping system
+            // 1-24-24: Done!
+            FindObjectOfType<PlayerEquipment>().AutoEquip(itemToUse.sObj);
         }
 
     }
 
+#endregion
 
     public void AddItem(InventoryItem a){
+        if(a.sObj.type == Item.ItemType.Currency){
+            playerCurrency += a.sObj.value * a.count;
+            return;
+        }
+        
         foreach (var item in playerInventory)
         {
             if(item.sObj.itemName == a.sObj.itemName){
@@ -647,8 +695,24 @@ public class PlayerInventory : MonoBehaviour
             RemoveItemFromInventory(itemToConsume);
             ToggleItemActionsMenu(itemToConsume);
             itemInspector.gameObject.SetActive(false);
+            UpdateSegmentIndices();
         }
         SetupItemUIButtons();
+    }
+
+    void UpdateSegmentIndices(){
+        if(northSelectedIndex >= northItems.Count && northSelectedIndex != 0){
+            northSelectedIndex--;
+        }
+        if(southSelectedIndex >= southItems.Count && southSelectedIndex != 0){
+            southSelectedIndex--;
+        }
+        if(westSelectedIndex >= westItems.Count && westSelectedIndex != 0){
+            westSelectedIndex--;
+        }
+        if(eastSelectedIndex >= eastItems.Count && eastSelectedIndex != 0){
+            eastSelectedIndex--;
+        }
     }
 
     public void UnequipSelectedItem(bool unequipAll = false){
@@ -692,8 +756,10 @@ public class PlayerInventory : MonoBehaviour
         }
 
         // Setup the item actions menu to show equip
-        if(selectedItem != null)
+        if(selectedItem != null && selectedItem.sObj){
             itemActionsMenu.Setup(selectedItem);
+
+        }
         SetupItemUIButtons();
         RefreshSelected();
     }
@@ -741,8 +807,10 @@ public class PlayerInventory : MonoBehaviour
             itemActionsMenu.Setup(selectedItem);
             dropItemMenu.Setup(selectedItem.count, selectedItem.sObj.itemName);
             itemInspector.SetupItemInspector(item.gObj);
+            itemInfo.Setup(item.sObj);
             //Activate
-            itemActionsMenu.gameObject.SetActive(!itemActionsMenu.gameObject.activeSelf);
+            itemInfo.gameObject.SetActive(true);
+            itemActionsMenu.gameObject.SetActive(true);
             itemInspector.gameObject.SetActive(true);
         }
         else if(item != selectedItem)
@@ -751,6 +819,7 @@ public class PlayerInventory : MonoBehaviour
             itemActionsMenu.Setup(selectedItem);
             dropItemMenu.Setup(selectedItem.count, selectedItem.sObj.itemName);
             itemInspector.SetupItemInspector(item.gObj);
+            itemInfo.Setup(item.sObj);
 
             //A different item has been clicked
             //Keep the menu active
@@ -758,7 +827,8 @@ public class PlayerInventory : MonoBehaviour
         else{
             selectedItem = null;
             //Deactivate
-            itemActionsMenu.gameObject.SetActive(!itemActionsMenu.gameObject.activeSelf);
+            itemInfo.gameObject.SetActive(false);
+            itemActionsMenu.gameObject.SetActive(false);
             itemInspector.gameObject.SetActive(false);
         }
         RefreshSelected();

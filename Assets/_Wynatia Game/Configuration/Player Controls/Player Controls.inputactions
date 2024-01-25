@@ -171,7 +171,7 @@
                     "name": "Change Gear Wheel Item",
                     "type": "Value",
                     "id": "45764b69-c440-453b-b8e5-0f169dbbf4fc",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": true

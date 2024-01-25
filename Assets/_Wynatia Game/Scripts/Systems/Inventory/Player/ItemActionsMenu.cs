@@ -9,6 +9,7 @@ public class ItemActionsMenu : MonoBehaviour
     [Header("The PlayerInventory and PlayerEquipment classes are auto-retrieved, no need to set them in the inspector.")]
     public PlayerInventory playerInventory;
     public PlayerEquipment playerEquipment;
+    public EquipMenu equipMenu;
     public Button dropItemButton;
     public Button itemActionAButton;
     public Button itemActionBButton;
@@ -28,8 +29,16 @@ public class ItemActionsMenu : MonoBehaviour
 
 
     public void Setup(PlayerInventory.InventoryItem item){
+        if(item == null){
+            return;
+        }
+        if(!item.sObj){
+            return;
+        }
+        
         playerInventory = FindObjectOfType<PlayerInventory>();
         playerEquipment = FindObjectOfType<PlayerEquipment>();
+        equipMenu = FindObjectOfType<EquipMenu>();
 
         Item.ItemType itemType = item.sObj.type;
 
@@ -66,16 +75,20 @@ public class ItemActionsMenu : MonoBehaviour
             
             // Necklace
             case Item.ItemType.Necklace:
-                GameObject nE = Instantiate(necklaceEquipper, equipperContainer);
+                // GameObject nE = Instantiate(necklaceEquipper, equipperContainer);
                 
                 if(!playerInventory.SelectedItemEquipped()){
                     SetButtonTexts("Equip");
+                    itemActionAButton.onClick.AddListener(delegate { equipMenu.Setup(item.sObj, ReturnEquipableSlots(item));});
+
                     // Use corresponding Equipper
-                    itemActionAButton.onClick.AddListener(delegate {nE.GetComponent<IEquipper>().EquipItem(item);});
+                    // itemActionAButton.onClick.AddListener(delegate {nE.GetComponent<IEquipper>().EquipItem(item);});
                 }
                 else{
                     SetButtonTexts("Unequip");
-                    itemActionAButton.onClick.AddListener(delegate {nE.GetComponent<IEquipper>().UnequipItem(item);});
+                    itemActionAButton.onClick.AddListener(delegate {playerEquipment.UnequipSlot(ref playerEquipment.necklace);});
+
+                    // itemActionAButton.onClick.AddListener(delegate {nE.GetComponent<IEquipper>().UnequipItem(item);});
                     dropItemButton.interactable = false;
                 }
                 break;
@@ -121,7 +134,7 @@ public class ItemActionsMenu : MonoBehaviour
 
                 if(!playerInventory.SelectedItemEquipped()){
                     SetButtonTexts("Equip", "Assign To Gear Wheel");
-                    itemActionAButton.onClick.AddListener(delegate {FindObjectOfType<EquipMenu>().Setup(item.sObj, playerEquipment.EquipableSlotsForItemType(itemType));});
+                    itemActionAButton.onClick.AddListener(delegate {equipMenu.Setup(item.sObj, ReturnEquipableSlots(item));});
                     // itemActionAButton.onClick.AddListener(delegate {FindObjectOfType<EquipMenu>().Setup();});
 
                     itemActionBButton.onClick.AddListener(delegate {playerInventory.OpenWheelToAssign(item);});
@@ -258,6 +271,11 @@ public class ItemActionsMenu : MonoBehaviour
                 break;
         }
 
+    }
+
+    Dictionary<string, Item> ReturnEquipableSlots(PlayerInventory.InventoryItem itemToFindSlotsFor){
+        playerEquipment = FindObjectOfType<PlayerEquipment>();
+        return playerEquipment.EquipableSlotsForItemType(itemToFindSlotsFor.sObj.type);
     }
 
     GameObject ReturnEquipper(Item.ItemType itemType){

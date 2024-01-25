@@ -49,6 +49,9 @@ public class EquipMenu : MonoBehaviour
         foreach(Transform child in scrollViewContent){
             Destroy(child.gameObject);
         }
+
+
+        // Debug.Log(slots.Count);
         
         foreach (var item in slots)
         {
@@ -58,7 +61,16 @@ public class EquipMenu : MonoBehaviour
                 d.GetComponent<EquipmentDisplay>().Setup(item, this);
                 d.GetComponent<Toggle>().group = equipmentDisplayToggleGroup;
             }
+            else{
+                // Debug.Log("item is null");
+
+                GameObject d = Instantiate(equipmentDisplayPrefab, scrollViewContent);
+                // Set equipment display's item
+                d.GetComponent<EquipmentDisplay>().Setup(new KeyValuePair<string, Item>(item.Key, null), this);
+                d.GetComponent<Toggle>().group = equipmentDisplayToggleGroup;
+            }
         }
+
 
         ResetComparisonWindow();
 
@@ -118,84 +130,99 @@ public class EquipMenu : MonoBehaviour
     }
 
     public void SetupComparisonWindow(Item oldItem, string iTESlot){
-        bool typesMatch;
-        if(oldItem.type == itemToEquip.type)
-            typesMatch = true;
-        else
-            typesMatch = false;
-        
-        oldItemText.SetText(oldItem.itemName);
+        Dictionary<string, ItemData> newItemStats = PopulateItemStats(itemToEquip);
+        Dictionary<string, ItemData> oldItemStats;
+        slotToEquipTo = iTESlot;
         newItemText.SetText("(replace with) " + itemToEquip.itemName);
 
-        slotToEquipTo = iTESlot;
+        if(oldItem){
+            bool typesMatch;
 
-        // Store as ints or floats ToStrings() and then try to parse it back out
-        // Hopefully this will allow for multiple item types with less duplication of effort
-
-        // Have value be class that can return the appropriate data type
-        Dictionary<string, ItemData> oldItemStats = PopulateItemStats(oldItem);
-        Dictionary<string, ItemData> newItemStats = PopulateItemStats(itemToEquip);
-
-
-        // Have dictionary with keys being strings ("base damage", "power attack damage") and values being Vector2s (x = oldItem value, y = new item value)
-        // (For matching item types) Have a prefab with three text objects: far left being simple text that has the key string, middle being text that displays x, far right being text displaying y
-        // (For non-matching item types) Have a prefab with two text objects: left being stats for old item and right being stats for new item 
-
-        // If item types match (could be shield and weapon, which wouldn't make sense to color code)
-        // For strings "Damage:", "Power Attack Damage:", "Weight:", "Sharpness:"
-            // Compare the values of x and y: if x is greater, color x text green and y text red; if y is greater, color y text green and x text red
-        // For strings "Cooldown Time:", "Power Attack Cooldown Time:"
-            // Compare the values of x and y: if x is greater, color x text red and y text green; if y is greater, color y text red and x text green
-
-        // Comparison window will have two panels as children (one for each item)
-        // Text object titling each of the items
-
-        if(typesMatch){
-            // Dictionary<string, Vector2> itemStats = new Dictionary<string, Vector2>();
-            Dictionary<string, ItemComparison> itemStats = new Dictionary<string, ItemComparison>();
+            if(oldItem.type == itemToEquip.type)
+                typesMatch = true;
+            else
+                typesMatch = false;
             
-            switch(oldItem.type){
-                case(Item.ItemType.Weapon):
-                    if(oldItem.meleeWeaponScriptableObject && itemToEquip.meleeWeaponScriptableObject){
-                        itemStats["Damage"] = new ItemComparison(oldItemStats["Damage"], newItemStats["Damage"]);
-                        itemStats["Power Attack Damage"] = new ItemComparison(oldItemStats["Power Attack Damage"], newItemStats["Power Attack Damage"]);
-                        itemStats["Cooldown Time"] = new ItemComparison(oldItemStats["Cooldown Time"], newItemStats["Cooldown Time"]);
-                        itemStats["Power Attack Cooldown Time"] = new ItemComparison(oldItemStats["Power Attack Cooldown Time"], newItemStats["Power Attack Cooldown Time"]);
-                        itemStats["Weight"] = new ItemComparison(oldItemStats["Weight"], newItemStats["Weight"]);
-                        itemStats["Sharpness"] = new ItemComparison(oldItemStats["Sharpness"], newItemStats["Sharpness"]);
-                        itemStats["Traits"] = new ItemComparison(oldItemStats["Traits"], newItemStats["Traits"]);
+            oldItemText.SetText(oldItem.itemName);
 
-                        CreateStatTextObjectsComparative(itemStats);
-                    }
-                    else if (oldItem.rangedWeaponScriptableObject && itemToEquip.rangedWeaponScriptableObject){
-                        itemStats["Damage"] = new ItemComparison(oldItemStats["Damage"], newItemStats["Damage"]);
-                        itemStats["Draw Time"] = new ItemComparison(oldItemStats["Draw Time"], newItemStats["Draw Time"]);
-                        itemStats["Cooldown Time"] = new ItemComparison(oldItemStats["Cooldown Time"], newItemStats["Cooldown Time"]);
-                        itemStats["Weight"] = new ItemComparison(oldItemStats["Weight"], newItemStats["Weight"]);
-                        itemStats["Sharpness"] = new ItemComparison(oldItemStats["Sharpness"], newItemStats["Sharpness"]);
-                        itemStats["Ammunition Type"] = new ItemComparison(oldItemStats["Ammunition Type"], newItemStats["Ammunition Type"]);
-                        itemStats["Traits"] = new ItemComparison(oldItemStats["Traits"], newItemStats["Traits"]);
 
-                        CreateStatTextObjectsComparative(itemStats);
-                    }
-                    else{
-                        // comparing a melee and a ranged weapon, can't compare stats
-                        SetupNoncomparativeDisplay(oldItemStats, newItemStats);
-                    }
-                    
-                break;
+            // Store as ints or floats ToStrings() and then try to parse it back out
+            // Hopefully this will allow for multiple item types with less duplication of effort
+
+            // Have value be class that can return the appropriate data type
+            oldItemStats = PopulateItemStats(oldItem);
+
+
+            // Have dictionary with keys being strings ("base damage", "power attack damage") and values being Vector2s (x = oldItem value, y = new item value)
+            // (For matching item types) Have a prefab with three text objects: far left being simple text that has the key string, middle being text that displays x, far right being text displaying y
+            // (For non-matching item types) Have a prefab with two text objects: left being stats for old item and right being stats for new item 
+
+            // If item types match (could be shield and weapon, which wouldn't make sense to color code)
+            // For strings "Damage:", "Power Attack Damage:", "Weight:", "Sharpness:"
+                // Compare the values of x and y: if x is greater, color x text green and y text red; if y is greater, color y text green and x text red
+            // For strings "Cooldown Time:", "Power Attack Cooldown Time:"
+                // Compare the values of x and y: if x is greater, color x text red and y text green; if y is greater, color y text red and x text green
+
+            // Comparison window will have two panels as children (one for each item)
+            // Text object titling each of the items
+
+            if(typesMatch){
+                // Dictionary<string, Vector2> itemStats = new Dictionary<string, Vector2>();
+                Dictionary<string, ItemComparison> itemStats = new Dictionary<string, ItemComparison>();
+                
+                switch(oldItem.type){
+                    case(Item.ItemType.Weapon):
+                        if(oldItem.meleeWeaponScriptableObject && itemToEquip.meleeWeaponScriptableObject){
+                            itemStats["Damage"] = new ItemComparison(oldItemStats["Damage"], newItemStats["Damage"]);
+                            itemStats["Power Attack Damage"] = new ItemComparison(oldItemStats["Power Attack Damage"], newItemStats["Power Attack Damage"]);
+                            itemStats["Cooldown Time"] = new ItemComparison(oldItemStats["Cooldown Time"], newItemStats["Cooldown Time"]);
+                            itemStats["Power Attack Cooldown Time"] = new ItemComparison(oldItemStats["Power Attack Cooldown Time"], newItemStats["Power Attack Cooldown Time"]);
+                            itemStats["Weight"] = new ItemComparison(oldItemStats["Weight"], newItemStats["Weight"]);
+                            itemStats["Sharpness"] = new ItemComparison(oldItemStats["Sharpness"], newItemStats["Sharpness"]);
+                            itemStats["Traits"] = new ItemComparison(oldItemStats["Traits"], newItemStats["Traits"]);
+
+                            CreateStatTextObjectsComparative(itemStats);
+                        }
+                        else if (oldItem.rangedWeaponScriptableObject && itemToEquip.rangedWeaponScriptableObject){
+                            itemStats["Damage"] = new ItemComparison(oldItemStats["Damage"], newItemStats["Damage"]);
+                            itemStats["Draw Time"] = new ItemComparison(oldItemStats["Draw Time"], newItemStats["Draw Time"]);
+                            itemStats["Cooldown Time"] = new ItemComparison(oldItemStats["Cooldown Time"], newItemStats["Cooldown Time"]);
+                            itemStats["Weight"] = new ItemComparison(oldItemStats["Weight"], newItemStats["Weight"]);
+                            itemStats["Sharpness"] = new ItemComparison(oldItemStats["Sharpness"], newItemStats["Sharpness"]);
+                            itemStats["Ammunition Type"] = new ItemComparison(oldItemStats["Ammunition Type"], newItemStats["Ammunition Type"]);
+                            itemStats["Traits"] = new ItemComparison(oldItemStats["Traits"], newItemStats["Traits"]);
+
+                            CreateStatTextObjectsComparative(itemStats);
+                        }
+                        else{
+                            // comparing a melee and a ranged weapon, can't compare stats
+                            SetupNoncomparativeDisplay(oldItemStats, newItemStats);
+                        }
+                        
+                    break;
+                }
+
+                
             }
+            else{
+                SetupNoncomparativeDisplay(oldItemStats, newItemStats);
+            }
+            confirmEquipButton.onClick.RemoveAllListeners();
+            confirmEquipButton.onClick.AddListener(delegate { Equip(oldItem); CloseMenu();});
 
-            
+            confirmEquipButton.interactable = true;
         }
         else{
-            SetupNoncomparativeDisplay(oldItemStats, newItemStats);
-        }
-        confirmEquipButton.onClick.RemoveAllListeners();
-        confirmEquipButton.onClick.AddListener(delegate { Equip(oldItem); CloseMenu();});
+            oldItemText.SetText("Empty");
+            oldItemStats = new Dictionary<string, ItemData>();
 
-        confirmEquipButton.interactable = true;
-        
+            SetupNoncomparativeDisplay(oldItemStats, newItemStats);
+            
+            confirmEquipButton.onClick.RemoveAllListeners();
+            confirmEquipButton.onClick.AddListener(delegate { Equip(oldItem); CloseMenu();});
+
+            confirmEquipButton.interactable = true;
+        }
     }
 
     void SetupNoncomparativeDisplay(Dictionary<string, ItemData> oldIS, Dictionary<string, ItemData> newIS){
@@ -387,6 +414,15 @@ public class EquipMenu : MonoBehaviour
         
         switch (itemToEquip.type)
         {
+            case(Item.ItemType.Necklace):
+                if(itemToReplace)
+                    playerEquipment.UnequipSlot(ref playerEquipment.necklace);
+                
+                playerEquipment.EquipSlot(out playerEquipment.necklace, itemToEquip);
+                // TODO have playerequipment instantiate worldobjects automatically for all items
+                // if possible, don't delete and reinstantiate all items every time
+            break;
+            
             case(Item.ItemType.Weapon):
                 if(itemToEquip.twoHanded){
                     // Unequip right and left hand slots

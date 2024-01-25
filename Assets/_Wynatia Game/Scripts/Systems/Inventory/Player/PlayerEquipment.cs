@@ -7,7 +7,7 @@ using UnityEngine.InputSystem;
 public class PlayerEquipment : MonoBehaviour
 {
     // public 
-    
+    #region Slots
     public Item headwear;
 
     public Item necklace;
@@ -26,6 +26,11 @@ public class PlayerEquipment : MonoBehaviour
     public Item clothing;
 
     public Item armor;
+#endregion
+
+#region Non-weapon instance containers
+    [SerializeField] Transform necklaceContainer;
+#endregion
 
     private PlayerCombatAgent playerCombatAgent;
     private PlayerCharacter playerCharacter;
@@ -61,9 +66,7 @@ public class PlayerEquipment : MonoBehaviour
 
     public void AddWeaponToMainHandContainer(Item weaponItem){
         if(weaponItem.meleeWeaponScriptableObject != null){
-            Debug.Log("before");
             InstantiateWeapon(weaponItem.worldObject, FindObjectOfType<PlayerCombatAgent>().rightHandContainer.transform);
-            Debug.Log("after");
         }
     }
     void AddWeaponToBothHandsContainer(Item weaponItem){
@@ -118,8 +121,51 @@ public class PlayerEquipment : MonoBehaviour
     }
 
     #endregion
+// Updates instances of all non-weapon equipment
+    void UpdateEquipmentInstances(){
+        PopulateEquipmentContainer(necklaceContainer, necklace, ref necklace);
 
+        
+    }
+// Checks if the instance found under the container has a scriptable object that matches the sObj
+    bool InstanceMatches(Transform container, Item item){
+        bool matches = false;
 
+        foreach (Transform child in container)
+        {
+            if(child.GetComponent<WorldItem>()){
+                if(child.GetComponent<WorldItem>().scriptableObject == item){
+                    matches = true;
+                    break;
+                }
+            }
+        }
+
+        return matches;
+    }
+
+    void PopulateEquipmentContainer(Transform container, Item item, ref Item slot){
+        if(slot){
+            if(!InstanceMatches(container, item)){
+                foreach (Transform child in container)
+                {
+                    Destroy(child.gameObject);
+                }
+
+                GameObject g = Instantiate(item.worldObject, container);
+                g.GetComponent<WorldItem>().DisablePickup();
+                g.GetComponent<WorldItem>().DisablePhysicsColliders();
+
+            }
+        }
+        else{
+            foreach (Transform child in container)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+        
+    }
 
     void Start(){
         playerCombatAgent = FindObjectOfType<PlayerCombatAgent>();
@@ -170,6 +216,9 @@ public class PlayerEquipment : MonoBehaviour
             }
             playerCombatAgent.Setup();
         }
+
+        PopulateWeaponContainers();
+        UpdateEquipmentInstances();
     }
 
     #endregion
@@ -177,6 +226,7 @@ public class PlayerEquipment : MonoBehaviour
     public void EquipSlot(out Item slot, Item item){
         slot = item;
         AddToPlayerInventoryList(item);
+        UpdateEquipmentInstances();
     }
 
 
@@ -214,7 +264,7 @@ public class PlayerEquipment : MonoBehaviour
 
         if(g.GetComponent<WorldItem>().scriptableObject.rangedWeaponScriptableObject){
             float drawTime = g.GetComponent<WorldItem>().scriptableObject.rangedWeaponScriptableObject.drawTime;
-            Debug.Log("interaction hold time: " + drawTime);
+            // Debug.Log("interaction hold time: " + drawTime);
             InputAction rangedAttackAction = FindObjectOfType<PlayerInput>().actions["Ranged Attack"];
 
 // ******* IF RANGED WEAPON INPUT DOESN'T MATCH WHAT CONTROL MANAGER HAS, LOOK HERE
@@ -223,7 +273,7 @@ public class PlayerEquipment : MonoBehaviour
                 overridePath = rangedAttackAction.bindings[0].effectivePath});
 
 
-                Debug.Log(rangedAttackAction.bindings[0].effectivePath + "; interactions: " + rangedAttackAction.bindings[0].effectiveInteractions);
+                // Debug.Log(rangedAttackAction.bindings[0].effectivePath + "; interactions: " + rangedAttackAction.bindings[0].effectiveInteractions);
         }
     }
     
@@ -239,6 +289,11 @@ public class PlayerEquipment : MonoBehaviour
             }
 
         }
+        else if(!dontEquipUnarmedStrike){
+            slot = FindObjectOfType<PlayerCharacter>().unarmedStrike;
+        }
+
+        UpdateEquipmentInstances();
         
     }
 
@@ -404,7 +459,12 @@ public class PlayerEquipment : MonoBehaviour
 
         switch(itemType){
             case Item.ItemType.Necklace:
+                slotsToReturn.Add("Necklace", necklace);
+            break;
+
             case Item.ItemType.Bracelet:
+            break;
+
             case Item.ItemType.Ring:
             break;
 
@@ -510,6 +570,31 @@ public class PlayerEquipment : MonoBehaviour
 
 
         return slot;
+    }
+
+    public void AutoEquip(Item itemToEquip){
+        switch(itemToEquip.type){
+            case(Item.ItemType.Weapon):
+                Item uS = playerCharacter.unarmedStrike;
+
+                if(itemToEquip.twoHanded){
+                    UnequipSlot(ref rightHand, true);
+                    UnequipSlot(ref leftHand, true);
+                    UnequipSlot(ref bothHands);
+
+                    EquipSlot(out bothHands, itemToEquip);
+                    PopulateWeaponContainers();
+                }
+                else{
+                    UnequipSlot(ref rightHand);
+                    UnequipSlot(ref leftHand);
+                    UnequipSlot(ref bothHands, true);
+
+                    EquipSlot(out rightHand, itemToEquip);
+                    PopulateWeaponContainers();
+                }
+            break;
+        }
     }
 
 }

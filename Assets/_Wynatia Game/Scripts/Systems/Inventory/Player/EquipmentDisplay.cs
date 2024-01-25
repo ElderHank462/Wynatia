@@ -21,23 +21,31 @@ public class EquipmentDisplay : MonoBehaviour
 
     public void Setup(KeyValuePair<string, Item> item, EquipMenu eMenu){
         equipMenu = eMenu;
-        
-        // Assign item
-        myItem = item.Value;
         mySlot = item.Key;
-        // Retrieve text
-        List<string> labelStrings = ReturnStatLabelText(myItem.type);
-        List<string> dataStrings = ReturnStatDataText(myItem.type);
-        // Set common text
-        nameText.SetText(myItem.itemName + " (" + mySlot + ")");
-        typeText.SetText(myItem.type.ToString());
-        // Instantiate and populate text
-        for (int i = 0; i < labelStrings.Count; i++)
-        {
-            GameObject t = Instantiate(textPrefab, transform);
-            t.GetComponent<TextAssigner>().SetText(0, labelStrings[i]);
-            t.GetComponent<TextAssigner>().SetText(1, dataStrings[i]);
+        
+        if(item.Value){
+            // Assign item
+            myItem = item.Value;
+            // Retrieve text
+            List<string> labelStrings = ReturnStatLabelText(myItem.type);
+            List<string> dataStrings = ReturnStatDataText(myItem.type);
+            // Set common text
+            nameText.SetText(myItem.itemName + " (" + mySlot + ")");
+            typeText.SetText(myItem.type.ToString());
+            // Instantiate and populate text
+            for (int i = 0; i < labelStrings.Count; i++)
+            {
+                GameObject t = Instantiate(textPrefab, transform);
+                t.GetComponent<TextAssigner>().SetText(0, labelStrings[i]);
+                t.GetComponent<TextAssigner>().SetText(1, dataStrings[i]);
+            }
         }
+        else{
+            nameText.SetText("Empty" + " (" + mySlot + ")");
+            typeText.SetText("");
+        }
+
+
         
         // Assign model to highlight
         

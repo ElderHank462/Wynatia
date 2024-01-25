@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dfeeab43ab2904e2ea4b81b0f38048e3, type: 3}
+  m_Name: Coin
+  m_EditorClassIdentifier: 
+  itemName: Coin
+  type: 0
+  effect: 0
+  itemLevel: 0
+  value: 1
+  worldObject: {fileID: 169071754765638970, guid: 59f846c0e39ef467996acbaf3ac5e4ab,
+    type: 3}
+  description: 
+  twoHanded: 0
+  meleeWeaponScriptableObject: {fileID: 0}
+  rangedWeaponScriptableObject: {fileID: 0}
+  ammunitionScriptableObject: {fileID: 0}

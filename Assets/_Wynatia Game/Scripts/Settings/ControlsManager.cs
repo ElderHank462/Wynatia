@@ -302,7 +302,7 @@ public class ControlsManager : MonoBehaviour
             if(FindObjectOfType<PlayerEquipment>().bothHands){
                 if(FindObjectOfType<PlayerEquipment>().bothHands.rangedWeaponScriptableObject){
                     float drawTime = FindObjectOfType<PlayerEquipment>().bothHands.rangedWeaponScriptableObject.drawTime;
-                    Debug.Log(drawTime);
+                    // Debug.Log(drawTime);
                     
                     InputAction rangedAttackAction = FindObjectOfType<PlayerInput>().actions["Ranged Attack"];
 
